@@ -31,6 +31,8 @@ import com.example.myapplication.viewmodel.LoginViewModel
 import com.example.myapplication.ui.components.CustomTextField
 import com.example.myapplication.ui.components.CustomButton
 
+import androidx.compose.ui.platform.LocalContext
+
 @Composable
 fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
 
@@ -91,8 +93,10 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
         Spacer(modifier = Modifier.height(24.dp))
 
 
+        val context = LocalContext.current
+
         CustomButton(
-            onClick = { loginViewModel.validateLogin() },
+            onClick = { loginViewModel.validateLogin(context) },
             text = stringResource(id = R.string.login_button)
         )
 

@@ -8,4 +8,7 @@
     <string name="login_success">¡Bienvenido, %1$s!</string>
     <string name="login_error">Usuario o contraseña incorrecta.</string>
     <string name="home_welcome">¡Bienvenido a Home!</string>
+    <string name="txt_city">Selecione la ciudad</string>
+    <string name="txt_country">Selecione el pais</string>
+
 </resources>
