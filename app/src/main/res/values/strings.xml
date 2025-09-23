@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">My Application</string>
+    <string name="username_hint">Usuario</string>
+    <string name="password_hint">Contraseña</string>
+    <string name="forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="login_button">Iniciar sesión</string>
+    <string name="create_account">Crear una cuenta</string>
+    <string name="login_success">¡Bienvenido, %1$s!</string>
+    <string name="login_error">Usuario o contraseña incorrecta.</string>
+    <string name="home_welcome">¡Bienvenido a Home!</string>
 </resources>

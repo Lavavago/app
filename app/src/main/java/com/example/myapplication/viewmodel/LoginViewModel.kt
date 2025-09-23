@@ -1,48 +1,31 @@
 package com.example.myapplication.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.example.myapplication.model.Role
 import com.example.myapplication.model.User
+import com.example.myapplication.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class LoginViewModel : ViewModel() {
 
-    // Lista de usuarios "de prueba" para la demostración
+    // Lista de usuarios de prueba
     private val fakeUsers = listOf(
-        User(
-            id = "1",
-            name = "Juan Pérez",
-            username = "juanp",
-            role = Role.ADMIN,
-            city = "Bogotá",
-            email = "juanp@example.com",
-            password = "pass123"
-        ),
-        User(
-            id = "2",
-            name = "María Gómez",
-            username = "mariag",
-            role = Role.USER,
-            city = "Medellín",
-            email = "mariag@example.com",
-            password = "pass456"
-        )
+        User("1", "Juan Pérez", "juanp", Role.ADMIN, "Bogotá", "juanp@example.com", "pass123"),
+        User("2", "María Gómez", "mariag", Role.USER, "Medellín", "mariag@example.com", "pass456")
     )
 
-    // Estado del UI para los campos de texto
+    // Estado de los campos
     private val _username = MutableStateFlow("")
     val username: StateFlow<String> = _username.asStateFlow()
 
     private val _password = MutableStateFlow("")
     val password: StateFlow<String> = _password.asStateFlow()
 
-    // Estado del UI para el mensaje de resultado (Bienvenido o error)
+    // Estado del resultado del login
     private val _loginResult = MutableStateFlow("")
-
-
-
     val loginResult: StateFlow<String> = _loginResult.asStateFlow()
 
     fun onUsernameChange(newUsername: String) {
@@ -53,12 +36,14 @@ class LoginViewModel : ViewModel() {
         _password.value = newPassword
     }
 
-    fun validateLogin() {
+
+    fun validateLogin(context: Context) {
         val userFound = fakeUsers.find { it.username == username.value && it.password == password.value }
-        if (userFound != null) {
-            _loginResult.value = "¡Bienvenido, ${userFound.name}!"
+        _loginResult.value = if (userFound != null) {
+            context.getString(R.string.login_success, userFound.name)
         } else {
-            _loginResult.value = "Usuario o contraseña incorrecta."
+            context.getString(R.string.login_error)
         }
     }
 }
+

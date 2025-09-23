@@ -9,11 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -21,8 +17,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -32,10 +28,12 @@ import com.example.myapplication.R
 import com.example.myapplication.viewmodel.LoginViewModel
 
 
+import com.example.myapplication.ui.components.CustomTextField
+import com.example.myapplication.ui.components.CustomButton
+
 @Composable
 fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
 
-    // Observa el estado del ViewModel para que la UI se actualice
     val username by loginViewModel.username.collectAsState()
     val password by loginViewModel.password.collectAsState()
     val loginResult by loginViewModel.loginResult.collectAsState()
@@ -48,74 +46,66 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
         verticalArrangement = Arrangement.Center
     ) {
 
-
+        Image(
+            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            contentDescription = null,
+            modifier = Modifier.size(120.dp)
+        )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "uniLocal",
+            text = stringResource(id = R.string.app_name),
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
         )
         Spacer(modifier = Modifier.height(48.dp))
 
-        // Campos de entrada (conectados al ViewModel)
-        OutlinedTextField(
+        // Uso del componente CustomTextField para el nombre de usuario
+        CustomTextField(
             value = username,
             onValueChange = { loginViewModel.onUsernameChange(it) },
-            label = { Text("Usuario") },
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.fillMaxWidth()
+            label = stringResource(id = R.string.username_hint)
         )
         Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(
+
+        // Uso del componente CustomTextField para la contraseña
+        CustomTextField(
             value = password,
             onValueChange = { loginViewModel.onPasswordChange(it) },
-            label = { Text("Contraseña") },
-            visualTransformation = PasswordVisualTransformation(),
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.fillMaxWidth()
+            label = stringResource(id = R.string.password_hint),
+            visualTransformation = PasswordVisualTransformation()
         )
 
-
-        Text(
-            text = "¿Olvidaste tu contraseña?",
-            color = MaterialTheme.colorScheme.onSurface,
+        TextButton(
+            onClick = { /* Lógica para olvidar contraseña */ },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp),
-            fontSize = 14.sp
-        )
+                .padding(top = 8.dp)
+        ) {
+            Text(
+                text = stringResource(id = R.string.forgot_password),
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 14.sp
+            )
+        }
         Spacer(modifier = Modifier.height(24.dp))
 
 
-        Button(
+        CustomButton(
             onClick = { loginViewModel.validateLogin() },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
-            )
-        ) {
-            Text(
-                text = "Iniciar sesión",
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-        }
-
+            text = stringResource(id = R.string.login_button)
+        )
 
         TextButton(onClick = { /* Lógica para crear una cuenta */ }) {
             Text(
-                text = "Crear una cuenta",
+                text = stringResource(id = R.string.create_account),
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(top = 16.dp)
             )
         }
 
-
         Spacer(modifier = Modifier.height(16.dp))
+
         Text(text = loginResult, color = MaterialTheme.colorScheme.error)
     }
 }
