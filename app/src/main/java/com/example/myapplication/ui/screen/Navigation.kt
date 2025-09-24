@@ -37,6 +37,14 @@ fun Navigation(){
                 }
             )
         }
+
+        composable<RouteScreen.EditUser> {
+            EditUserScreen(
+                onBack = {
+                    navController.navigate(RouteScreen.Home)
+                }
+            )
+        }
         composable<RouteScreen.CreatePlace> {
             CreatePlaceScreen()
         }
@@ -47,6 +55,9 @@ fun Navigation(){
                     navController.navigate(RouteScreen.Login) {
                         popUpTo(RouteScreen.Home) { inclusive = true }
                     }
+                },
+                onEditProfile = {
+                    navController.navigate(RouteScreen.EditUser)
                 }
             )
         }

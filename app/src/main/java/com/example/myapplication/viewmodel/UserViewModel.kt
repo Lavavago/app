@@ -4,6 +4,11 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+sealed class UserSaveResult {
+    object Success : UserSaveResult()
+    object Error : UserSaveResult()
+}
+
 class CreateUserViewModel : ViewModel() {
 
     private val _name = MutableStateFlow("")
@@ -21,7 +26,6 @@ class CreateUserViewModel : ViewModel() {
     private val _password = MutableStateFlow("")
     val password: StateFlow<String> = _password
 
-    // Resultado específico para usuario
     private val _userSaveResult = MutableStateFlow<UserSaveResult?>(null)
     val userSaveResult: StateFlow<UserSaveResult?> = _userSaveResult
 
@@ -32,7 +36,7 @@ class CreateUserViewModel : ViewModel() {
     fun onCityChange(newValue: String) { _city.value = newValue }
     fun onPasswordChange(newValue: String) { _password.value = newValue }
 
-    // Guardar usuario
+    // Guardar usuario (creación)
     fun saveUser() {
         _userSaveResult.value =
             if (_name.value.isBlank() || _username.value.isBlank() ||
@@ -44,10 +48,14 @@ class CreateUserViewModel : ViewModel() {
                 UserSaveResult.Success
             }
     }
-}
 
-// Nuevo sealed class exclusivo para usuarios
-sealed class UserSaveResult {
-    object Success : UserSaveResult()
-    object Error : UserSaveResult()
+    // Actualizar usuario (edición)
+    fun updateUser() {
+        _userSaveResult.value =
+            if (_name.value.isBlank() || _username.value.isBlank() || _city.value.isBlank()) {
+                UserSaveResult.Error
+            } else {
+                UserSaveResult.Success
+            }
+    }
 }

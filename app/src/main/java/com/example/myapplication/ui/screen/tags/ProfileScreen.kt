@@ -19,7 +19,8 @@ import com.example.myapplication.model.Role
 import com.example.myapplication.model.User
 
 @Composable
-fun ProfileScreen(onLogout: () -> Unit) {
+fun ProfileScreen(onLogout: () -> Unit,
+                  onEditProfile: () -> Unit,) {
     val fakeUser = User(
         id = "1",
         name = "Juan Pérez",
@@ -67,6 +68,13 @@ fun ProfileScreen(onLogout: () -> Unit) {
         ProfileItem(label = "Rol", value = fakeUser.role.toString())
 
         Spacer(modifier = Modifier.height(32.dp))
+
+        // Botón de editar perfil
+        Button(onClick = onEditProfile) {
+            Text("Editar perfil")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Botón de cerrar sesión
         Button(onClick = onLogout) {

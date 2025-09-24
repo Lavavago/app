@@ -40,7 +40,8 @@ import com.example.myapplication.ui.screen.tags.inicio
 import com.example.myapplication.ui.config.RouteScreen
 
 @Composable
-fun HomeScreen(onLogout: () -> Unit) {
+fun HomeScreen(onLogout: () -> Unit,
+               onEditProfile: () -> Unit) {
     val navController = rememberNavController()
 
     Scaffold(
@@ -58,7 +59,8 @@ fun HomeScreen(onLogout: () -> Unit) {
         ContentUser(
             navController = navController,
             padding = padding,
-            onLogout = onLogout
+            onLogout = onLogout,
+            onEditProfile = onEditProfile
         )
     }
 
@@ -69,7 +71,8 @@ fun HomeScreen(onLogout: () -> Unit) {
 fun ContentUser(
     padding: PaddingValues,
     navController: NavHostController,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onEditProfile: () -> Unit
 ) {
 
 
@@ -91,7 +94,8 @@ fun ContentUser(
             CreatePlaceScreen()
         }
         composable<RouteTab.ProfileScreen> {
-            ProfileScreen(onLogout = onLogout)
+            ProfileScreen(onLogout = onLogout,
+                            onEditProfile = onEditProfile)
         }
     }
 
