@@ -35,5 +35,36 @@
     <string name="menu_safe">Guardados</string>
     <string name="menu_Explorer">explorar</string>
 
+    <string name="menu_profile">Perfil</string>
+    <string name="txt_back">Retroceder</string>
+
+    <string name="create_user_title">Crear Usuario</string>
+    <string name="name2_label">Nombre</string>
+    <string name="username_label">Usuario</string>
+    <string name="email_label">Correo</string>
+    <string name="city_label">Ciudad</string>
+    <string name="password_label">Contraseña</string>
+    <string name="save_user_button">Guardar Usuario</string>
+    <string name="user_created_success">Usuario creado correctamente</string>
+    <string name="user_created_error">Error al crear el usuario</string>
+
+    <string name="profile_title">Perfil de Usuario</string>
+    <string name="edit_profile">Editar perfil</string>
+    <string name="logout">Cerrar sesión</string>
+    <string name="label_id">ID</string>
+    <string name="label_name">Nombre</string>
+    <string name="label_username">Usuario</string>
+    <string name="label_email">Correo</string>
+    <string name="label_city">Ciudad</string>
+    <string name="label_role">Rol</string>
+    <string name="profile_icon_desc">Icono de perfil</string>
+
+    <string name="edit_user_title">Editar Usuario</string>
+    <string name="label_password">Contraseña</string>
+    <string name="save_changes">Guardar Cambios</string>
+    <string name="user_updated_success">Usuario actualizado correctamente</string>
+    <string name="user_updated_error">Error al actualizar el usuario</string>
+    <string name="back">Retroceder</string>
+    <string name="user_icon_desc">Icono de usuario</string>
 
 </resources>

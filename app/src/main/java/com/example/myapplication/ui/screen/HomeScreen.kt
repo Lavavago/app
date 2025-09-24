@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,13 +32,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.R
 import com.example.myapplication.ui.screen.nav.RouteTab
+import com.example.myapplication.ui.screen.tags.ProfileScreen
 import com.example.myapplication.ui.screen.tags.CreatePlaceScreen
 import com.example.myapplication.ui.screen.tags.ExploreScreen
 import com.example.myapplication.ui.screen.tags.SafeScreen
 import com.example.myapplication.ui.screen.tags.inicio
+import com.example.myapplication.ui.config.RouteScreen
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(onLogout: () -> Unit,
+               onEditProfile: () -> Unit) {
     val navController = rememberNavController()
 
     Scaffold(
@@ -54,11 +58,11 @@ fun HomeScreen() {
     ) { padding ->
         ContentUser(
             navController = navController,
-            padding = padding
+            padding = padding,
+            onLogout = onLogout,
+            onEditProfile = onEditProfile
         )
     }
-
-
 
 }
 
@@ -66,7 +70,9 @@ fun HomeScreen() {
 @Composable
 fun ContentUser(
     padding: PaddingValues,
-    navController: NavHostController
+    navController: NavHostController,
+    onLogout: () -> Unit,
+    onEditProfile: () -> Unit
 ) {
 
 
@@ -86,6 +92,10 @@ fun ContentUser(
         }
         composable<RouteTab.CreatePlaceScreen> {
             CreatePlaceScreen()
+        }
+        composable<RouteTab.ProfileScreen> {
+            ProfileScreen(onLogout = onLogout,
+                            onEditProfile = onEditProfile)
         }
     }
 
@@ -151,5 +161,6 @@ enum class Destination(
     Explorer(RouteTab.ExploreScreen, R.string.menu_Explorer, Icons.Default.Search ),
     Safe(RouteTab.SafeScreen, R.string.menu_safe, Icons.Default.Favorite ),
     CreatePlace(RouteTab.CreatePlaceScreen, R.string.menu_create_place, Icons.Default.Add ),
+    Profile(RouteTab.ProfileScreen, R.string.menu_profile, Icons.Default.Person ),
 
 }

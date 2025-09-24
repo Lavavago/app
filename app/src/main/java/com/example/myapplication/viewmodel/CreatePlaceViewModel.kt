@@ -59,4 +59,3 @@ sealed class SaveResult {
     object Success : SaveResult()
     object Error : SaveResult()
 }
-

@@ -36,7 +36,8 @@ import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun LoginScreen(loginViewModel: LoginViewModel = viewModel()
-                ,onNavigateToHome: () -> Unit
+                ,onNavigateToHome: () -> Unit,
+                onNavigateToCreateUser: () -> Unit
 ) {
 
     val username by loginViewModel.username.collectAsState()
@@ -111,7 +112,7 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()
             }
         }
 
-        TextButton(onClick = { /* Lógica para crear una cuenta */ }) {
+        TextButton(onClick = { onNavigateToCreateUser() }) {
             Text(
                 text = stringResource(id = R.string.create_account),
                 color = MaterialTheme.colorScheme.primary,
