@@ -28,6 +28,10 @@ class LoginViewModel : ViewModel() {
     private val _loginResult = MutableStateFlow("")
     val loginResult: StateFlow<String> = _loginResult.asStateFlow()
 
+    private val _isLoginSuccessful = MutableStateFlow(false)
+    val isLoginSuccessful: StateFlow<Boolean> = _isLoginSuccessful.asStateFlow()
+
+
     fun onUsernameChange(newUsername: String) {
         _username.value = newUsername
     }
@@ -39,10 +43,12 @@ class LoginViewModel : ViewModel() {
 
     fun validateLogin(context: Context) {
         val userFound = fakeUsers.find { it.username == username.value && it.password == password.value }
-        _loginResult.value = if (userFound != null) {
-            context.getString(R.string.login_success, userFound.name)
+        if (userFound != null) {
+            _loginResult.value = context.getString(R.string.login_success, userFound.name)
+            _isLoginSuccessful.value = true
         } else {
-            context.getString(R.string.login_error)
+            _loginResult.value = context.getString(R.string.login_error)
+            _isLoginSuccessful.value = false
         }
     }
 }

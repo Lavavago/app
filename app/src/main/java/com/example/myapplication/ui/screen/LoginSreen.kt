@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -34,11 +35,15 @@ import com.example.myapplication.ui.components.CustomButton
 import androidx.compose.ui.platform.LocalContext
 
 @Composable
-fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
+fun LoginScreen(loginViewModel: LoginViewModel = viewModel()
+                ,onNavigateToHome: () -> Unit
+) {
 
     val username by loginViewModel.username.collectAsState()
     val password by loginViewModel.password.collectAsState()
     val loginResult by loginViewModel.loginResult.collectAsState()
+    val isLoginSuccessful by loginViewModel.isLoginSuccessful.collectAsState()
+
 
     Column(
         modifier = Modifier
@@ -99,6 +104,12 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             onClick = { loginViewModel.validateLogin(context) },
             text = stringResource(id = R.string.login_button)
         )
+
+        LaunchedEffect(isLoginSuccessful) {
+            if (isLoginSuccessful) {
+                onNavigateToHome()
+            }
+        }
 
         TextButton(onClick = { /* Lógica para crear una cuenta */ }) {
             Text(

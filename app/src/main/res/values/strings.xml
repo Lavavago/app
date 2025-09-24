@@ -11,4 +11,29 @@
     <string name="txt_city">Selecione la ciudad</string>
     <string name="txt_country">Selecione el pais</string>
 
+
+    <string name="location_icon_desc">Ubicación</string>
+    <string name="app_title">uniLocal</string>
+    <string name="add_place_title">Añade un lugar</string>
+    <string name="name_label">Nombre del sitio</string>
+    <string name="address_label">Dirección exacta</string>
+    <string name="category_label">Categoría</string>
+    <string name="phone_label">Teléfono</string>
+    <string name="schedule_label">Calendario para horarios</string>
+    <string name="map_location_label">Ubicación mapa interactivo</string>
+    <string name="photos_label">Fotografías</string>
+    <string name="add_button">Agregar</string>
+
+    <string name="place_saved_success">Lugar " creado con éxito</string>
+    <string name="place_saved_error"> Por favor completa todos los campos</string>
+
+
+    <string name="tittle_home">Inicio usuario</string>
+
+    <string name="menu_home">home</string>
+    <string name="menu_create_place">Contribuir</string>
+    <string name="menu_safe">Guardados</string>
+    <string name="menu_Explorer">explorar</string>
+
+
 </resources>
