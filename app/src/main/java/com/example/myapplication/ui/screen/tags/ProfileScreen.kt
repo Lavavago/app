@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.Button
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,7 +19,7 @@ import com.example.myapplication.model.Role
 import com.example.myapplication.model.User
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(onLogout: () -> Unit) {
     val fakeUser = User(
         id = "1",
         name = "Juan Pérez",
@@ -64,6 +65,13 @@ fun ProfileScreen() {
         ProfileItem(label = "Correo", value = fakeUser.email)
         ProfileItem(label = "Ciudad", value = fakeUser.city)
         ProfileItem(label = "Rol", value = fakeUser.role.toString())
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Botón de cerrar sesión
+        Button(onClick = onLogout) {
+            Text("Cerrar sesión")
+        }
     }
 }
 

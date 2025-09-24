@@ -14,7 +14,7 @@ fun Navigation(){
 
     NavHost(
         navController = navController,
-        startDestination = RouteScreen.Home
+        startDestination = RouteScreen.Login
     ){
 
         composable<RouteScreen.Login> {
@@ -30,7 +30,13 @@ fun Navigation(){
         }
 
         composable<RouteScreen.Home> {
-            HomeScreen()
+            HomeScreen(
+                onLogout = {
+                    navController.navigate(RouteScreen.Login) {
+                        popUpTo(RouteScreen.Home) { inclusive = true }
+                    }
+                }
+            )
         }
 
     }
