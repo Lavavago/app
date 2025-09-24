@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.model.Role
 import com.example.myapplication.model.User
+import androidx.compose.ui.res.stringResource
+import com.example.myapplication.R
 
 @Composable
 fun ProfileScreen(onLogout: () -> Unit,
@@ -42,43 +44,38 @@ fun ProfileScreen(onLogout: () -> Unit,
         // Icono superior
         Icon(
             imageVector = Icons.Filled.Person,
-            contentDescription = "Profile Icon",
+            contentDescription = stringResource(R.string.profile_icon_desc),
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(80.dp)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Título
         Text(
-            text = "Perfil de Usuario",
+            text = stringResource(R.string.profile_title),
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
         )
+        Spacer(modifier = Modifier.height(32.dp))
+
+        ProfileItem(label = stringResource(R.string.label_id), value = fakeUser.id)
+        ProfileItem(label = stringResource(R.string.label_name), value = fakeUser.name)
+        ProfileItem(label = stringResource(R.string.label_username), value = fakeUser.username)
+        ProfileItem(label = stringResource(R.string.label_email), value = fakeUser.email)
+        ProfileItem(label = stringResource(R.string.label_city), value = fakeUser.city)
+        ProfileItem(label = stringResource(R.string.label_role), value = fakeUser.role.toString())
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Info del usuario
-        ProfileItem(label = "ID", value = fakeUser.id)
-        ProfileItem(label = "Nombre", value = fakeUser.name)
-        ProfileItem(label = "Usuario", value = fakeUser.username)
-        ProfileItem(label = "Correo", value = fakeUser.email)
-        ProfileItem(label = "Ciudad", value = fakeUser.city)
-        ProfileItem(label = "Rol", value = fakeUser.role.toString())
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Botón de editar perfil
         Button(onClick = onEditProfile) {
-            Text("Editar perfil")
+            Text(stringResource(R.string.edit_profile))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        // Botón de cerrar sesión
+        
         Button(onClick = onLogout) {
-            Text("Cerrar sesión")
+            Text(stringResource(R.string.logout))
         }
     }
 }

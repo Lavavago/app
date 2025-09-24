@@ -22,6 +22,8 @@ import com.example.myapplication.ui.components.CustomButton
 import com.example.myapplication.ui.components.CustomTextField
 import com.example.myapplication.viewmodel.CreateUserViewModel
 import com.example.myapplication.viewmodel.UserSaveResult
+import androidx.compose.ui.res.stringResource
+import com.example.myapplication.R
 
 @Composable
 fun EditUserScreen(
@@ -45,7 +47,7 @@ fun EditUserScreen(
     ) {
         Icon(
             imageVector = Icons.Filled.Person,
-            contentDescription = "User Icon",
+            contentDescription = stringResource(R.string.user_icon_desc),
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(60.dp)
         )
@@ -53,7 +55,7 @@ fun EditUserScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Editar Usuario",
+            text = stringResource(R.string.edit_user_title),
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
@@ -62,27 +64,38 @@ fun EditUserScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         // Campos editables
-        CustomTextField(value = name, onValueChange = { createUserViewModel.onNameChange(it) }, label = "Nombre")
+        CustomTextField(
+            value = name,
+            onValueChange = { createUserViewModel.onNameChange(it) },
+            label = stringResource(R.string.label_name)
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        CustomTextField(value = username, onValueChange = { createUserViewModel.onUsernameChange(it) }, label = "Usuario")
+        CustomTextField(
+            value = username,
+            onValueChange = { createUserViewModel.onUsernameChange(it) },
+            label = stringResource(R.string.label_username)
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        CustomTextField(value = city, onValueChange = { createUserViewModel.onCityChange(it) }, label = "Ciudad")
+        CustomTextField(
+            value = city,
+            onValueChange = { createUserViewModel.onCityChange(it) },
+            label = stringResource(R.string.label_city)
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
         // Campos no editables
         androidx.compose.material3.TextField(
             value = email,
             onValueChange = {},
-            label = { Text("Correo") },
+            label = { Text(stringResource(R.string.label_email)) },
             readOnly = true,
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
-        Spacer(modifier = Modifier.height(16.dp))
         androidx.compose.material3.TextField(
             value = password,
             onValueChange = {},
-            label = { Text("Contraseña") },
+            label = { Text(stringResource(R.string.label_password)) },
             readOnly = true,
             visualTransformation = PasswordVisualTransformation(),
             singleLine = true,
@@ -93,7 +106,7 @@ fun EditUserScreen(
 
         CustomButton(
             onClick = { createUserViewModel.updateUser() },
-            text = "Guardar Cambios"
+            text = stringResource(R.string.save_changes)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -101,8 +114,8 @@ fun EditUserScreen(
         saveResult?.let { result ->
             Text(
                 text = when(result) {
-                    UserSaveResult.Success -> "Usuario actualizado correctamente"
-                    UserSaveResult.Error -> "Error al actualizar el usuario"
+                    UserSaveResult.Success -> stringResource(R.string.user_updated_success)
+                    UserSaveResult.Error -> stringResource(R.string.user_updated_error)
                 },
                 color = when(result) {
                     UserSaveResult.Success -> MaterialTheme.colorScheme.primary
@@ -116,7 +129,7 @@ fun EditUserScreen(
         Spacer(modifier = Modifier.height(16.dp))
         CustomButton(
             onClick = { onBack() },
-            text = "Retroceder"
+            text = stringResource(R.string.back)
         )
     }
 }
