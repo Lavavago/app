@@ -36,6 +36,16 @@
     <string name="menu_Explorer">explorar</string>
 
     <string name="menu_profile">Perfil</string>
+    <string name="txt_back">Retroceder</string>
 
+    <string name="create_user_title">Crear Usuario</string>
+    <string name="name2_label">Nombre</string>
+    <string name="username_label">Usuario</string>
+    <string name="email_label">Correo</string>
+    <string name="city_label">Ciudad</string>
+    <string name="password_label">Contraseña</string>
+    <string name="save_user_button">Guardar Usuario</string>
+    <string name="user_created_success">Usuario creado correctamente</string>
+    <string name="user_created_error">Error al crear el usuario</string>
 
 </resources>

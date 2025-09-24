@@ -7,6 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.ui.config.RouteScreen
 import com.example.myapplication.ui.screen.tags.CreatePlaceScreen
 
+
 @Composable
 fun Navigation(){
 
@@ -21,10 +22,21 @@ fun Navigation(){
             LoginScreen(
                 onNavigateToHome = {
                     navController.navigate(RouteScreen.Home)
+                },
+                onNavigateToCreateUser = {
+                    navController.navigate(RouteScreen.Register)
                 }
             )
         }
-
+        composable<RouteScreen.Register> {
+            RegisterUserScreen(
+                onLogout = {
+                    navController.navigate(RouteScreen.Login) {
+                        popUpTo(RouteScreen.Home) { inclusive = true }
+                    }
+                }
+            )
+        }
         composable<RouteScreen.CreatePlace> {
             CreatePlaceScreen()
         }
@@ -41,4 +53,9 @@ fun Navigation(){
 
     }
 
+}
+
+@Composable
+fun RegisterScreen() {
+    TODO("Not yet implemented")
 }
