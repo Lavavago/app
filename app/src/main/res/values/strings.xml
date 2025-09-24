@@ -35,5 +35,7 @@
     <string name="menu_safe">Guardados</string>
     <string name="menu_Explorer">explorar</string>
 
+    <string name="menu_profile">Perfil</string>
+
 
 </resources>
