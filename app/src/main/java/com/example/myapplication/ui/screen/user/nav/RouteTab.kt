@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.screen.nav
+package com.example.myapplication.ui.screen.user.nav
 
 import kotlinx.serialization.Serializable
 

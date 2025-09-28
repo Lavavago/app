@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.screen.tags
+package com.example.myapplication.ui.screen.user.tags
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable

@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.screen.tags
+package com.example.myapplication.ui.screen.user.tags
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

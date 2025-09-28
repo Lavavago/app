@@ -5,7 +5,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.ui.config.RouteScreen
-import com.example.myapplication.ui.screen.tags.CreatePlaceScreen
+import com.example.myapplication.ui.screen.user.HomeScreen
+import com.example.myapplication.ui.screen.user.tags.CreatePlaceScreen
 
 
 @Composable
