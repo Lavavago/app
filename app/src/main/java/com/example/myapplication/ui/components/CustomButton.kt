@@ -1,21 +1,19 @@
 package com.example.myapplication.ui.components
 
-
-
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height // <-- ¡AÑADE ESTE IMPORT!
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.VisualTransformation // Este ya no es necesario aquí
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+// ---------- BOTÓN PERSONALIZADO ----------
 @Composable
 fun CustomButton(
     onClick: () -> Unit,
@@ -25,7 +23,11 @@ fun CustomButton(
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
+        // 💡 CAMBIO CLAVE: Fija la altura a 56.dp para que sea más grande
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp),
+
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary
@@ -37,7 +39,7 @@ fun CustomButton(
             color = Color.White,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(vertical = 8.dp)
+
         )
     }
 }

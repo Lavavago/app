@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">My Application</string>
+    <string name="app_name">UniLocal</string>
     <string name="username_hint">Usuario</string>
     <string name="password_hint">Contraseña</string>
     <string name="forgot_password">¿Olvidaste tu contraseña?</string>
@@ -67,4 +67,18 @@
     <string name="back">Retroceder</string>
     <string name="user_icon_desc">Icono de usuario</string>
 
+
+
+
+
+<string name="profile_full_name">Nombre Completo</string>
+<string name="profile_username">Nombre de usuario</string>
+<string name="profile_city">Ciudad de residencia</string>
+<string name="profile_email">Correo electrónico </string>
+<string name="profile_return_login">¿Volver al login de nuevo?</string>
+
+
+    <string name="not_editable">(No editable)</string>
+
 </resources>
+

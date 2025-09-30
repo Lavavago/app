@@ -1,41 +1,39 @@
 package com.example.myapplication.ui.screen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource // Importación para cargar la imagen
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.ui.text.input.PasswordVisualTransformation
+import com.example.myapplication.R // Importación del R para acceder a los recursos
 import com.example.myapplication.ui.components.CustomButton
 import com.example.myapplication.ui.components.CustomTextField
 import com.example.myapplication.viewmodel.CreateUserViewModel
 import com.example.myapplication.viewmodel.UserSaveResult
-import androidx.compose.ui.res.stringResource
-import com.example.myapplication.R
 
 @Composable
 fun RegisterUserScreen(
     createUserViewModel: CreateUserViewModel = viewModel(),
-    onLogout: () -> Unit
+    onLogout: () -> Unit // Función para volver/navegar
 ) {
+    // Estados del ViewModel (deben inicializarse con "")
     val name by createUserViewModel.name.collectAsState()
     val username by createUserViewModel.username.collectAsState()
     val email by createUserViewModel.email.collectAsState()
-    val city by createUserViewModel.city.collectAsState()
     val password by createUserViewModel.password.collectAsState()
+    val city by createUserViewModel.city.collectAsState()
+
     val saveResult by createUserViewModel.userSaveResult.collectAsState()
 
     Column(
@@ -44,89 +42,99 @@ fun RegisterUserScreen(
             .padding(24.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+        verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            imageVector = Icons.Filled.Person,
-            contentDescription = stringResource(R.string.create_user_title),
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(60.dp)
+        // Logo (Imagen del pin de ubicación morado)
+        Image(
+            // **IMPORTANTE:** Cambia 'ic_unilocal_logo' por el nombre real de tu archivo en res/drawable.
+            painter = painterResource(id = R.drawable.gps2),
+            contentDescription = "Logo uniLocal",
+            modifier = Modifier.size(64.dp)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Nombre de la app
         Text(
-            text = stringResource(R.string.create_user_title),
-            fontSize = 22.sp,
+            text = "uniLocal",
+            fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
+        // --- 1. Nombre ---
         CustomTextField(
             value = name,
             onValueChange = { createUserViewModel.onNameChange(it) },
-            label = stringResource(R.string.name2_label)
+            placeholder = "Nombre"
         )
         Spacer(modifier = Modifier.height(16.dp))
 
+        // --- 2. Nombre de usuario ---
         CustomTextField(
             value = username,
             onValueChange = { createUserViewModel.onUsernameChange(it) },
-            label = stringResource(R.string.username_label)
+            placeholder = "Nombre de usuario"
         )
         Spacer(modifier = Modifier.height(16.dp))
 
+        // --- 3. Gmail ---
         CustomTextField(
             value = email,
             onValueChange = { createUserViewModel.onEmailChange(it) },
-            label = stringResource(R.string.email_label)
+            placeholder = "Gmail"
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        CustomTextField(
-            value = city,
-            onValueChange = { createUserViewModel.onCityChange(it) },
-            label = stringResource(R.string.city_label)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
+        // --- 4. Contraseña ---
         CustomTextField(
             value = password,
             onValueChange = { createUserViewModel.onPasswordChange(it) },
-            label = stringResource(R.string.password_label),
+            placeholder = "Contraseña",
             visualTransformation = PasswordVisualTransformation()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // --- 5. Ciudad de residencia ---
+        CustomTextField(
+            value = city,
+            onValueChange = { createUserViewModel.onCityChange(it) },
+            placeholder = "Ciudad de residencia"
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
+        // Botón principal con el texto "Iniciar sesión"
         CustomButton(
             onClick = { createUserViewModel.saveUser() },
-            text = stringResource(R.string.save_user_button)
+            text = "Iniciar sesión"
         )
 
+        // --- Mensajes de retroalimentación (para errores o éxito) ---
         Spacer(modifier = Modifier.height(16.dp))
 
         saveResult?.let { result ->
             Text(
                 text = when (result) {
-                    UserSaveResult.Success -> stringResource(R.string.user_created_success)
-                    UserSaveResult.Error -> stringResource(R.string.user_created_error)
+                    UserSaveResult.Success -> "Usuario creado con éxito"
+                    UserSaveResult.Error -> "Error al crear usuario"
                 },
                 color = when (result) {
                     UserSaveResult.Success -> MaterialTheme.colorScheme.primary
                     UserSaveResult.Error -> MaterialTheme.colorScheme.error
                 },
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
             )
         }
 
-        Button(onClick = onLogout) {
-            Text(
-                text = stringResource(id = R.string.txt_back)
-            )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Botón opcional para regresar
+        TextButton(onClick = onLogout) {
+            Text(text = "Volver")
         }
     }
 }
