@@ -1,11 +1,11 @@
 package com.example.myapplication.ui.screen.user
 
-import androidx.compose.foundation.background // Importar
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color // Importar
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.ui.screen.user.bottombar.BottomBarUser
 import com.example.myapplication.ui.screen.user.nav.ContentUser

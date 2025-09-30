@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class LoginViewModel : ViewModel() {
 
-    // Lista de usuarios de prueba
+
     private val fakeUsers = listOf(
         User("1", "Juan Pérez", "juanp", Role.ADMIN, "Bogotá", "juanp@example.com", "pass123"),
         User("2", "María Gómez", "mariag", Role.USER, "Medellín", "mariag@example.com", "pass456")

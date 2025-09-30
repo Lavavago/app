@@ -72,7 +72,7 @@ fun LoginScreen(
         )
         Spacer(modifier = Modifier.height(48.dp))
 
-        // Campo de Usuario
+
         NeumorphicBox(
             modifier = Modifier
                 .fillMaxWidth()
@@ -87,7 +87,7 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Campo de Contraseña
+
         NeumorphicBox(
             modifier = Modifier
                 .fillMaxWidth()

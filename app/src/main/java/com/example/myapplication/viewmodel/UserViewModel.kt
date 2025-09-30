@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-// --- Data Model: Define User structure ---
+
 data class User(
     val id: String,
     val name: String,
@@ -14,7 +14,7 @@ data class User(
     val email: String,
     val passwordHash: String? = null
 )
-// ------------------------------------------
+
 
 sealed class UserSaveResult {
     object Success : UserSaveResult()
@@ -41,15 +41,8 @@ class CreateUserViewModel : ViewModel() {
     private val _userSaveResult = MutableStateFlow<UserSaveResult?>(null)
     val userSaveResult: StateFlow<UserSaveResult?> = _userSaveResult.asStateFlow()
 
-    // ❌ Bloque INIT comentado para que los campos de REGISTRO NO TENGAN DATOS.
-    // Los campos ahora se inicializan con la cadena vacía ("").
-    /*init {
-        // This simulates the EditUserScreen launching and fetching data.
-        loadUserData()
-    }*/
 
-    // --- Data Loading Function (Comentada) ---
-    /*
+
     fun loadUserData() {
         val fakeUser = User(
             id = "1",
@@ -68,17 +61,16 @@ class CreateUserViewModel : ViewModel() {
         // Reset any previous save results
         _userSaveResult.value = null
     }
-    */
-    // -----------------------------
 
-    // Métodos para actualizar campos
+
+
     fun onNameChange(newValue: String) { _name.value = newValue }
     fun onUsernameChange(newValue: String) { _username.value = newValue }
     fun onEmailChange(newValue: String) { _email.value = newValue }
     fun onCityChange(newValue: String) { _city.value = newValue }
     fun onPasswordChange(newValue: String) { _password.value = newValue }
 
-    // Guardar usuario (creación)
+
     fun saveUser() {
         _userSaveResult.value =
             if (_name.value.isBlank() || _username.value.isBlank() ||
@@ -92,9 +84,9 @@ class CreateUserViewModel : ViewModel() {
         println("User Created: Name=${_name.value}")
     }
 
-    // Actualizar usuario (edición)
+
     fun updateUser() {
-        // Solo verifica campos usados para actualizar (Name, Username, City)
+
         _userSaveResult.value =
             if (_name.value.isBlank() || _username.value.isBlank() || _city.value.isBlank()) {
                 UserSaveResult.Error

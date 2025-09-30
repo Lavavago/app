@@ -13,7 +13,7 @@ import androidx.compose.ui.text.input.VisualTransformation // Este ya no es nece
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// ---------- BOTÓN PERSONALIZADO ----------
+
 @Composable
 fun CustomButton(
     onClick: () -> Unit,

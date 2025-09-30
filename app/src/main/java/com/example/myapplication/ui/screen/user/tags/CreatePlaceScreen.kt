@@ -15,33 +15,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.R
-import com.example.myapplication.ui.components.CustomDropdown // <<-- ¡Asegúrate de que esta ruta sea correcta!
+import com.example.myapplication.ui.components.CustomDropdown
 import com.example.myapplication.viewmodel.CreatePlaceViewModel
 import com.example.myapplication.viewmodel.SaveResult
-
-
-// --- Listas de Opciones para los Dropdowns ---
-private val CATEGORY_OPTIONS = listOf(
-    "Restaurante", "Cafetería", "Museo", "Parque", "Librería", "Otro..."
-)
-
-private val SCHEDULE_OPTIONS = listOf(
-    "Lunes a Sábado (8AM - 8PM)", "Lunes a Viernes (9AM - 5PM)", "Abierto 24 Horas"
-)
-
-private val LOCATION_OPTIONS = listOf(
-    "Seleccionar en Mapa", "Usar Coordenada Actual"
-)
-
-private val PHOTOS_OPTIONS = listOf(
-    "1 Foto", "3 Fotos", "5 Fotos o Más"
-)
-// ---------------------------------------------
 
 
 @Composable
@@ -49,7 +32,7 @@ fun CreatePlaceScreen(
     createPlaceViewModel: CreatePlaceViewModel = viewModel(),
     onClose: () -> Unit = {}
 ) {
-    // 1. Obtener el estado del ViewModel
+
     val name by createPlaceViewModel.name.collectAsState()
     val address by createPlaceViewModel.address.collectAsState()
     val category by createPlaceViewModel.category.collectAsState()
@@ -58,6 +41,13 @@ fun CreatePlaceScreen(
     val location by createPlaceViewModel.location.collectAsState()
     val photos by createPlaceViewModel.photos.collectAsState()
     val saveResult by createPlaceViewModel.saveResult.collectAsState()
+
+
+    val categoryOptions = stringArrayResource(id = R.array.category_options).toList()
+    val scheduleOptions = stringArrayResource(id = R.array.schedule_options).toList()
+    val locationOptions = stringArrayResource(id = R.array.location_options).toList()
+    val photosOptions = stringArrayResource(id = R.array.photos_options).toList()
+
 
     Scaffold { paddingValues ->
         Column(
@@ -68,25 +58,30 @@ fun CreatePlaceScreen(
                 .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // --- Encabezado y Título ---
+
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Código del Logo y uniLocal
+
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Nota: Asegúrate de tener R.drawable.gps2
+
                     Image(
                         painter = painterResource(id = R.drawable.gps2),
-                        contentDescription = "Logo de ubicación uniLocal",
+                        contentDescription = stringResource(R.string.location_icon_desc),
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "uniLocal", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                    Text(
+                        text = stringResource(R.string.app_title),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
                 IconButton(onClick = onClose) {
-                    Icon(imageVector = Icons.Filled.Close, contentDescription = "Cerrar formulario")
+                    Icon(imageVector = Icons.Filled.Close, contentDescription = stringResource(R.string.txt_back))
                 }
             }
 
@@ -94,86 +89,100 @@ fun CreatePlaceScreen(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Añade un lugar", fontSize = 24.sp, fontWeight = FontWeight.Normal, modifier = Modifier.weight(1f))
-                Icon(imageVector = Icons.Filled.Create, contentDescription = "Editar título", tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
+                Text(
+                    text = stringResource(R.string.add_place_title),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Normal,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(imageVector = Icons.Filled.Create, contentDescription = stringResource(R.string.edit_profile), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
             }
 
 
-            // --- CAMPOS DEL FORMULARIO DE LUGAR ---
             Spacer(modifier = Modifier.height(8.dp))
 
-            // 1. Nombre del sitio (TextField)
+
             CustomTextField(
-                value = name, onValueChange = createPlaceViewModel::onNameChange, placeholder = "Nombre del sitio"
+                value = name,
+                onValueChange = createPlaceViewModel::onNameChange,
+                placeholder = stringResource(R.string.name_label)
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 2. Dirección exacta (TextField)
+
             CustomTextField(
-                value = address, onValueChange = createPlaceViewModel::onAddressChange, placeholder = "Dirección exacta"
+                value = address,
+                onValueChange = createPlaceViewModel::onAddressChange,
+                placeholder = stringResource(R.string.address_label)
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 3. Categoría (Dropdown)
+
             CustomDropdown(
-                label = "Categoría",
-                list = CATEGORY_OPTIONS,
+                label = stringResource(R.string.category_label),
+                list = categoryOptions,
                 onValueChange = createPlaceViewModel::onCategoryChange,
                 initialValue = category
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 4. Teléfono (TextField)
+
             CustomTextField(
-                value = phone, onValueChange = createPlaceViewModel::onPhoneChange, placeholder = "Teléfono"
+                value = phone,
+                onValueChange = createPlaceViewModel::onPhoneChange,
+                placeholder = stringResource(R.string.phone_label)
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 5. Calendario para horarios (Dropdown)
+
             CustomDropdown(
-                label = "Calendario para horarios",
-                list = SCHEDULE_OPTIONS,
+                label = stringResource(R.string.schedule_label),
+                list = scheduleOptions,
                 onValueChange = createPlaceViewModel::onScheduleChange,
                 initialValue = schedule
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 6. Ubicación mapa interactivo (Dropdown)
+
             CustomDropdown(
-                label = "Ubicación mapa interactivo",
-                list = LOCATION_OPTIONS,
+                label = stringResource(R.string.map_location_label),
+                list = locationOptions,
                 onValueChange = createPlaceViewModel::onLocationChange,
                 initialValue = location
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 7. Fotografías (Dropdown)
+
             CustomDropdown(
-                label = "Fotografías",
-                list = PHOTOS_OPTIONS,
+                label = stringResource(R.string.photos_label),
+                list = photosOptions,
                 onValueChange = createPlaceViewModel::onPhotosChange,
                 initialValue = photos
             )
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            // --- Botón "Agregar" ---
+
             Button(
                 onClick = createPlaceViewModel::savePlace,
                 modifier = Modifier.fillMaxWidth().height(50.dp).padding(horizontal = 40.dp),
                 shape = RoundedCornerShape(25.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
             ) {
-                Text(text = "Agregar", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                Text(
+                    text = stringResource(R.string.add_button),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
 
-            // Mensaje de resultado
+
             if (saveResult != null) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = when (saveResult) {
-                        is SaveResult.Success -> "¡Lugar guardado con éxito! Revisa la consola."
-                        is SaveResult.Error -> "Error: Por favor, llena todos los campos."
+                        is SaveResult.Success -> stringResource(R.string.place_saved_success) + " (Revisa la consola)"
+                        is SaveResult.Error -> stringResource(R.string.place_saved_error)
                         else -> ""
                     },
                     color = if (saveResult is SaveResult.Success) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
@@ -185,7 +194,6 @@ fun CreatePlaceScreen(
     }
 }
 
-// --- Componente auxiliar CustomTextField ---
 
 @Composable
 fun CustomTextField(

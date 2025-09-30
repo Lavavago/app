@@ -10,13 +10,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource // Importación para cargar la imagen
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.myapplication.R // Importación del R para acceder a los recursos
+import com.example.myapplication.R
 import com.example.myapplication.ui.components.CustomButton
 import com.example.myapplication.ui.components.CustomTextField
 import com.example.myapplication.viewmodel.CreateUserViewModel
@@ -25,9 +26,9 @@ import com.example.myapplication.viewmodel.UserSaveResult
 @Composable
 fun RegisterUserScreen(
     createUserViewModel: CreateUserViewModel = viewModel(),
-    onLogout: () -> Unit // Función para volver/navegar
+    onLogout: () -> Unit
 ) {
-    // Estados del ViewModel (deben inicializarse con "")
+
     val name by createUserViewModel.name.collectAsState()
     val username by createUserViewModel.username.collectAsState()
     val email by createUserViewModel.email.collectAsState()
@@ -44,19 +45,18 @@ fun RegisterUserScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Logo (Imagen del pin de ubicación morado)
+
         Image(
-            // **IMPORTANTE:** Cambia 'ic_unilocal_logo' por el nombre real de tu archivo en res/drawable.
             painter = painterResource(id = R.drawable.gps2),
-            contentDescription = "Logo uniLocal",
+            contentDescription = stringResource(R.string.user_icon_desc),
             modifier = Modifier.size(64.dp)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Nombre de la app
+
         Text(
-            text = "uniLocal",
+            text = stringResource(R.string.app_title),
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
@@ -64,62 +64,70 @@ fun RegisterUserScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // --- 1. Nombre ---
+        // Título de la pantalla
+        Text(
+            text = stringResource(R.string.create_user_title),
+            fontSize = 24.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+
         CustomTextField(
             value = name,
             onValueChange = { createUserViewModel.onNameChange(it) },
-            placeholder = "Nombre"
+            placeholder = stringResource(R.string.name2_label)
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- 2. Nombre de usuario ---
+
         CustomTextField(
             value = username,
             onValueChange = { createUserViewModel.onUsernameChange(it) },
-            placeholder = "Nombre de usuario"
+            placeholder = stringResource(R.string.username_label)
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- 3. Gmail ---
+
         CustomTextField(
             value = email,
             onValueChange = { createUserViewModel.onEmailChange(it) },
-            placeholder = "Gmail"
+            placeholder = stringResource(R.string.email_label)
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- 4. Contraseña ---
+
         CustomTextField(
             value = password,
             onValueChange = { createUserViewModel.onPasswordChange(it) },
-            placeholder = "Contraseña",
+            placeholder = stringResource(R.string.password_label),
             visualTransformation = PasswordVisualTransformation()
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- 5. Ciudad de residencia ---
+
         CustomTextField(
             value = city,
             onValueChange = { createUserViewModel.onCityChange(it) },
-            placeholder = "Ciudad de residencia"
+            placeholder = stringResource(R.string.profile_city)
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Botón principal con el texto "Iniciar sesión"
+
         CustomButton(
             onClick = { createUserViewModel.saveUser() },
-            text = "Iniciar sesión"
+            text = stringResource(R.string.save_user_button) // Usando "Guardar Usuario"
         )
 
-        // --- Mensajes de retroalimentación (para errores o éxito) ---
+
         Spacer(modifier = Modifier.height(16.dp))
 
         saveResult?.let { result ->
             Text(
                 text = when (result) {
-                    UserSaveResult.Success -> "Usuario creado con éxito"
-                    UserSaveResult.Error -> "Error al crear usuario"
+                    UserSaveResult.Success -> stringResource(R.string.user_created_success)
+                    UserSaveResult.Error -> stringResource(R.string.user_created_error)
                 },
                 color = when (result) {
                     UserSaveResult.Success -> MaterialTheme.colorScheme.primary
@@ -132,9 +140,9 @@ fun RegisterUserScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón opcional para regresar
+
         TextButton(onClick = onLogout) {
-            Text(text = "Volver")
+            Text(text = stringResource(R.string.profile_return_login))
         }
     }
 }

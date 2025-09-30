@@ -51,7 +51,7 @@ fun ProfileScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        // 1. Icono de Perfil y Botón de Editar
+
         Spacer(modifier = Modifier.height(32.dp))
         ProfileHeaderSection(
             user = fakeUser,
@@ -60,7 +60,7 @@ fun ProfileScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // 2. Campos de Datos con estilo flotante
+
         ProfileDataField(
             label = stringResource(R.string.profile_full_name),
             value = fakeUser.name
@@ -80,7 +80,7 @@ fun ProfileScreen(
 
         Spacer(modifier = Modifier.height(48.dp))
 
-        // 3. Texto de regreso (logout)
+
         Text(
             text = stringResource(R.string.profile_return_login),
             fontSize = 16.sp,
@@ -94,9 +94,6 @@ fun ProfileScreen(
     }
 }
 
-// -------------------------------------------------------------------------------------------------
-// Encabezado del Perfil (Ícono + Botón de Editar)
-// -------------------------------------------------------------------------------------------------
 
 @Composable
 fun ProfileHeaderSection(user: User, onEditProfile: () -> Unit) {
@@ -161,9 +158,6 @@ fun ProfileHeaderSection(user: User, onEditProfile: () -> Unit) {
     }
 }
 
-// -------------------------------------------------------------------------------------------------
-// Campo de Datos con Estilo Flotante
-// -------------------------------------------------------------------------------------------------
 
 @Composable
 private fun ProfileDataField(label: String, value: String) {

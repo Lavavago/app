@@ -80,5 +80,33 @@
 
     <string name="not_editable">(No editable)</string>
 
+    <string-array name="category_options">
+        <item>Restaurante</item>
+        <item>Cafetería</item>
+        <item>Museo</item>
+        <item>Comida rapida</item>
+        <item>Hotel</item>
+    </string-array>
+
+    <string-array name="schedule_options">
+        <item>Lunes a Sábado (8AM - 8PM)</item>
+        <item>Lunes a Viernes (9AM - 5PM)</item>
+        <item>Abierto 24 Horas</item>
+    </string-array>
+
+    <string-array name="location_options">
+        <item>Seleccionar en Mapa</item>
+        <item>Usar Coordenada Actual</item>
+    </string-array>
+
+    <string-array name="photos_options">
+        <item>1 Foto</item>
+        <item>3 Fotos</item>
+        <item>5 Fotos o Más</item>
+    </string-array>
+
+
+
+
 </resources>
 

@@ -38,7 +38,7 @@ fun EditUserScreen(
     createUserViewModel: CreateUserViewModel = viewModel(),
     onBack: () -> Unit
 ) {
-    // 1. Recolección de estados del ViewModel
+    //  Recolección de estados del ViewModel
     val name by createUserViewModel.name.collectAsState()
     val username by createUserViewModel.username.collectAsState()
     val email by createUserViewModel.email.collectAsState()
@@ -84,14 +84,12 @@ fun EditUserScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // 1. Icono de Perfil
+
             ProfileIcon(primaryColor)
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // 2. Campos de Edición
 
-            // Nombre Completo (Editable)
             FloatingTextField(
                 value = name,
                 onValueChange = {
@@ -104,7 +102,7 @@ fun EditUserScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Nombre de usuario (Editable)
+
             FloatingTextField(
                 value = username,
                 onValueChange = {
@@ -117,22 +115,20 @@ fun EditUserScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Correo Electrónico (BLOQUEADO: isEditable = false)
+
             FloatingTextField(
                 value = email,
                 onValueChange = { /* Ignorado, no es editable */ },
 
-                // Usamos 'not_editable' (asumiendo que lo definiste)
-                // Si no tienes 'not_editable', cambia a: label = "${stringResource(R.string.profile_email)} (${stringResource(R.string.back)})",
                 label = "${stringResource(R.string.profile_email)} ${stringResource(R.string.not_editable)}",
 
                 isFocused = focusedField == "email",
                 onFocus = { focusedField = if (it) "email" else null },
-                isEditable = false // <-- DESHABILITA LA EDICIÓN
+                isEditable = false //
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Ciudad de residencia (Editable)
+
             FloatingTextField(
                 value = city,
                 onValueChange = {
@@ -147,7 +143,7 @@ fun EditUserScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
 
-            // 3. Botón "Guardar cambios"
+
             PurpleButton(
                 onClick = { createUserViewModel.updateUser() },
                 text = stringResource(R.string.save_changes)
@@ -155,7 +151,7 @@ fun EditUserScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Mensaje de resultado
+
             saveResult?.let { result ->
                 Text(
                     text = when(result) {
@@ -172,8 +168,8 @@ fun EditUserScreen(
             }
 
             Spacer(modifier = Modifier.height(32.dp))
-        } // Fin del Column de Scroll
-    } // Fin del Column principal
+        }
+    }
 }
 
 
@@ -196,9 +192,6 @@ fun ProfileIcon(primaryColor: Color) {
     }
 }
 
-// -------------------------------------------------------------------------------------------------
-// Componente: FloatingTextField
-// -------------------------------------------------------------------------------------------------
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -262,9 +255,6 @@ fun FloatingTextField(
     }
 }
 
-// -------------------------------------------------------------------------------------------------
-// Componente: PurpleButton
-// -------------------------------------------------------------------------------------------------
 
 @Composable
 fun PurpleButton(onClick: () -> Unit, text: String) {

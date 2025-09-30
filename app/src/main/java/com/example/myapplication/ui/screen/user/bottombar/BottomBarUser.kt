@@ -27,7 +27,7 @@ fun BottomBarUser(
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    val primaryColor = MaterialTheme.colorScheme.primary // El color morado del tema
+    val primaryColor = MaterialTheme.colorScheme.primary
 
     NavigationBar(
     ) {
@@ -58,7 +58,7 @@ fun BottomBarUser(
                     )
                 },
                 selected = isSelected,
-                // Configuración de colores para que todos los íconos sean morados
+
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = primaryColor,
                     unselectedIconColor = primaryColor,

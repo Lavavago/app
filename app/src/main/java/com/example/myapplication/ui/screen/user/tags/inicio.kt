@@ -37,13 +37,13 @@ fun inicio(navController: NavController) {
             navController = navController
         )
 
-        // 2. Contenido principal (donde iría el mapa)
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
                 .padding(horizontal = 16.dp, vertical = 8.dp)
-                // Fondo para simular el área del mapa.
+
                 .background(Color(0xFFE0E0E0), RoundedCornerShape(16.dp)),
             contentAlignment = Alignment.Center
         ) {
@@ -55,7 +55,6 @@ fun inicio(navController: NavController) {
             )
         }
 
-        // 3. Texto inferior (Armenia/Quindio)
         Text(
             text = "Armenia/Quindio",
             fontSize = 20.sp,
@@ -65,7 +64,7 @@ fun inicio(navController: NavController) {
     }
 }
 
-// Componente para la barra de búsqueda y los chips de filtro
+
 @Composable
 fun TopSearchAndFilterSection(modifier: Modifier = Modifier, navController: NavController) {
     Column(
@@ -76,12 +75,11 @@ fun TopSearchAndFilterSection(modifier: Modifier = Modifier, navController: NavC
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
-                // *** CORRECCIÓN DE SOMBRA FINAL: Máxima visibilidad ***
                 .shadow(
                     elevation = 8.dp, // Sombra muy alta
                     shape = RoundedCornerShape(28.dp),
-                    ambientColor = Color.Black.copy(alpha = 0.3f), // Más opacidad
-                    spotColor = Color.Black.copy(alpha = 0.5f)    // Sombra muy oscura
+                    ambientColor = Color.Black.copy(alpha = 0.3f),
+                    spotColor = Color.Black.copy(alpha = 0.5f)
                 )
                 .background(Color.White, RoundedCornerShape(28.dp))
                 .height(56.dp)
@@ -94,7 +92,7 @@ fun TopSearchAndFilterSection(modifier: Modifier = Modifier, navController: NavC
                     .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Ícono de Buscar en morado
+
                 Icon(
                     Icons.Default.Search,
                     contentDescription = "Buscar",
@@ -109,7 +107,7 @@ fun TopSearchAndFilterSection(modifier: Modifier = Modifier, navController: NavC
                     modifier = Modifier.weight(1f)
                 )
 
-                // Ícono de Perfil en morado y funcional
+
                 Icon(
                     Icons.Default.Person,
                     contentDescription = "Perfil",
@@ -143,7 +141,7 @@ fun TopSearchAndFilterSection(modifier: Modifier = Modifier, navController: NavC
     }
 }
 
-// Componente individual para el Chip de filtro (mantenido con sombra sutil)
+
 @Composable
 fun FilterChip(label: String, iconRes: Int) {
     var isSelected by remember { mutableStateOf(false) }

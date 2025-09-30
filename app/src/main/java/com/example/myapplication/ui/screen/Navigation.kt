@@ -45,7 +45,7 @@ fun Navigation(){
         composable<RouteScreen.EditUser> {
             EditUserScreen(
                 onBack = {
-                    // Al volver, navega hacia atrás o a Home
+
                     navController.popBackStack()
                 }
             )

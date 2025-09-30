@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-// --- Definiciones de datos ---
+
 data class Place(
     val name: String,
     val address: String,
@@ -20,12 +20,12 @@ sealed class SaveResult {
     object Success : SaveResult()
     object Error : SaveResult()
 }
-// ----------------------------------------------------------------------
+
 
 
 class CreatePlaceViewModel : ViewModel() {
 
-    // Se inicializan con cadenas vacías ""
+
     private val _name = MutableStateFlow("")
     val name: StateFlow<String> = _name.asStateFlow()
 
@@ -79,7 +79,7 @@ class CreatePlaceViewModel : ViewModel() {
 
 
     fun savePlace() {
-        // Lógica de validación
+
         _saveResult.value =
             if (name.value.isBlank() || address.value.isBlank() || category.value.isBlank() ||
                 phone.value.isBlank() || schedule.value.isBlank() || location.value.isBlank() || photos.value.isBlank()

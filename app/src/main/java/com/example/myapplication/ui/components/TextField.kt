@@ -26,18 +26,18 @@ fun CustomTextField(
         placeholder = { Text(placeholder) },
         visualTransformation = visualTransformation,
 
-        // Ajustamos la forma para que se parezca más al diseño
+
         shape = RoundedCornerShape(12.dp),
 
         modifier = Modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
 
-            // 💡 CAMBIO CLAVE: Fondo blanco para imitar el diseño
+
             focusedContainerColor = Color.White,
             unfocusedContainerColor = Color.White,
             disabledContainerColor = Color.White,
 
-            // Dejamos los bordes transparentes para que no se vean
+
             focusedBorderColor = Color.Transparent,
             unfocusedBorderColor = Color.Transparent,
             disabledBorderColor = Color.Transparent,
