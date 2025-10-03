@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
@@ -65,78 +66,88 @@ fun inicio(navController: NavController) {
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopSearchAndFilterSection(modifier: Modifier = Modifier, navController: NavController) {
     Column(
         modifier = modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)
     ) {
-        // --- Barra de Búsqueda ---
-        Box(
+        // estado del query y expanded
+        var query by rememberSaveable { mutableStateOf("") }
+        var expanded by rememberSaveable { mutableStateOf(false) }
+
+        // SearchBar (Material3, experimental)
+        SearchBar(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp)
-                .shadow(
-                    elevation = 8.dp, // Sombra muy alta
-                    shape = RoundedCornerShape(28.dp),
-                    ambientColor = Color.Black.copy(alpha = 0.3f),
-                    spotColor = Color.Black.copy(alpha = 0.5f)
-                )
-                .background(Color.White, RoundedCornerShape(28.dp))
-                .height(56.dp)
-                .clickable { /* Lógica de búsqueda */ },
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                Icon(
-                    Icons.Default.Search,
-                    contentDescription = "Buscar",
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Spacer(Modifier.width(8.dp))
-
-                Text(
-                    text = "Buscar aquí",
-                    color = Color.Gray,
-                    fontSize = 16.sp,
-                    modifier = Modifier.weight(1f)
-                )
-
-
-                Icon(
-                    Icons.Default.Person,
-                    contentDescription = "Perfil",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.clickable {
-                        navController.navigate(RouteTab.ProfileScreen) {
-                            popUpTo(RouteTab.Inicio) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+                .padding(vertical = 8.dp),
+            inputField = {
+                SearchBarDefaults.InputField(
+                    query = query,
+                    onQueryChange = { query = it },
+                    // onSearch recibe el string de la búsqueda
+                    onSearch = { searchQuery ->
+                        expanded = false
+                        // Aquí ejecutas la lógica de búsqueda con searchQuery o con `query`
+                        // p.e. viewModel.search(searchQuery)
+                    },
+                    expanded = expanded,
+                    onExpandedChange = { expanded = it },
+                    placeholder = { Text(text = "Buscar aquí") },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Buscar",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Perfil",
+                            modifier = Modifier
+                                .padding(start = 8.dp)
+                                .clickable {
+                                    navController.navigate(RouteTab.ProfileScreen) {
+                                        popUpTo(RouteTab.Inicio) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                        )
                     }
                 )
-            }
+            },
+            expanded = expanded,
+            onExpandedChange = { expanded = it }
+        ) {
+            // opcional preguntar a laura si se implementa
+            // contenido mostrado al expandir (sugerencias)
+            // Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+               // Text(text = "Sugerencia 1: Café en Armenia")
+               // Spacer(modifier = Modifier.height(6.dp))
+               // Text(text = "Sugerencia 2: Restaurante cerca")
+               // Spacer(modifier = Modifier.height(6.dp))
+               // Text(text = "Sugerencia 3: Museo del Oro")
+            // }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // --- Chips de Filtro ---
+        // --- Chips de Filtro  ---
         Row(
-            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             FilterChip(label = "Restaurante", iconRes = R.drawable.cuchara)
             FilterChip(label = "Cafetería", iconRes = R.drawable.cafeteria)
             FilterChip(label = "Museo", iconRes = R.drawable.cuadro)
-            FilterChip(label="comida rapida",iconRes = R.drawable.hamburguesa)
-            FilterChip(label="Hotel",iconRes = R.drawable.recurso)
-
+            FilterChip(label = "Comida rápida", iconRes = R.drawable.hamburguesa)
+            FilterChip(label = "Hotel", iconRes = R.drawable.recurso)
         }
+
         Spacer(modifier = Modifier.height(16.dp))
     }
 }

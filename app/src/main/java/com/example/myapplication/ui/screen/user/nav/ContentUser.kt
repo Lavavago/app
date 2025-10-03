@@ -9,9 +9,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.example.myapplication.ui.screen.CreatePlaceScreen
 import com.example.myapplication.ui.screen.RegisterUserScreen
 import com.example.myapplication.ui.screen.user.tags.ExploreScreen
+import com.example.myapplication.ui.screen.user.tags.PlaceDetail
 import com.example.myapplication.ui.screen.user.tags.ProfileScreen
 import com.example.myapplication.ui.screen.user.tags.SafeScreen
 import com.example.myapplication.ui.screen.user.tags.inicio
@@ -39,7 +41,11 @@ fun ContentUser(
         }
         composable<RouteTab.SafeScreen> {
             SafeScreen(
-                placesViewModel = placesViewModel
+                padding = padding,
+                placesViewModel = placesViewModel,
+                onNavigateToCreatePlace = {
+                    navController.navigate(RouteTab.PlaceDetail(it))
+                }
             )
         }
         composable<RouteTab.CreatePlaceScreen> {
@@ -49,6 +55,15 @@ fun ContentUser(
             ProfileScreen(
                 onLogout = onLogout,
                 onEditProfile = onEditProfile
+            )
+        }
+
+        composable<RouteTab.PlaceDetail> {
+            val args = it.toRoute<RouteTab.PlaceDetail>()
+            PlaceDetail(
+                placesViewModel = placesViewModel,
+                padding = padding,
+                id = args.id
             )
         }
     }
