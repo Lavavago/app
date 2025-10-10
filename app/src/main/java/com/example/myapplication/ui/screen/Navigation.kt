@@ -107,7 +107,17 @@ fun Navigation(
                 }
 
                 composable<RouteScreen.HomeAdmin> {
-                    HomeAdmin()
+                    HomeAdmin(
+                        onLogout = {
+                            SharedPrefsUtil.clearPreferences(context)
+                            navController.navigate(RouteScreen.Login) {
+                                popUpTo(RouteScreen.Home) { inclusive = true }
+                            }
+                        },
+                        onEditProfile = {
+                            navController.navigate(RouteScreen.EditUser)
+                        }
+                    )
                 }
 
             }

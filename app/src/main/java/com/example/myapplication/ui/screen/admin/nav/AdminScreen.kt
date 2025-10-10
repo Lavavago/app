@@ -10,4 +10,10 @@ sealed class AdminScreen {
     @Serializable
     data object History : AdminScreen()
 
+    @Serializable
+    data object Profile : AdminScreen()
+
+    @Serializable
+    data object Principal : AdminScreen()
+
 }

@@ -17,7 +17,10 @@ import com.example.myapplication.ui.screen.admin.nav.ContentAdmin
 import com.example.myapplication.ui.screen.admin.bottombar.BottomBarAdmin
 
 @Composable
-fun HomeAdmin(){
+fun HomeAdmin(
+    onLogout: () -> Unit,
+    onEditProfile: () -> Unit
+){
 
     val navController = rememberNavController()
 
@@ -34,7 +37,9 @@ fun HomeAdmin(){
     ) { padding ->
         ContentAdmin(
             navController = navController,
-            padding = padding
+            padding = padding,
+            onLogout = onLogout,
+            onEditProfile = onEditProfile
         )
     }
 }

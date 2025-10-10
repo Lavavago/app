@@ -11,8 +11,10 @@ import com.example.myapplication.ui.screen.user.bottombar.BottomBarUser
 import com.example.myapplication.ui.screen.user.nav.ContentUser
 
 @Composable
-fun HomeScreen(onLogout: () -> Unit,
-               onEditProfile: () -> Unit) {
+fun HomeScreen(
+    onLogout: () -> Unit,
+    onEditProfile: () -> Unit
+) {
     val navController = rememberNavController()
 
     Scaffold(
