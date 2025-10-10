@@ -1,98 +1,70 @@
 package com.example.myapplication.viewmodel
 
 import androidx.lifecycle.ViewModel
+import com.example.myapplication.model.City
+import com.example.myapplication.model.Role
+import com.example.myapplication.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+class UsersViewModel: ViewModel(){
 
-data class User(
-    val id: String,
-    val name: String,
-    val username: String,
-    val city: String,
-    val email: String,
-    val passwordHash: String? = null
-)
+    private val _users = MutableStateFlow(emptyList<User>())
+    val users: StateFlow<List<User>> = _users.asStateFlow()
 
+    init {
+        loadUsers()
+    }
 
-sealed class UserSaveResult {
-    object Success : UserSaveResult()
-    object Error : UserSaveResult()
-}
+    fun loadUsers(){
 
-class CreateUserViewModel : ViewModel() {
-
-    private val _name = MutableStateFlow("")
-    val name: StateFlow<String> = _name.asStateFlow()
-
-    private val _username = MutableStateFlow("")
-    val username: StateFlow<String> = _username.asStateFlow()
-
-    private val _email = MutableStateFlow("")
-    val email: StateFlow<String> = _email.asStateFlow()
-
-    private val _city = MutableStateFlow("")
-    val city: StateFlow<String> = _city.asStateFlow()
-
-    private val _password = MutableStateFlow("")
-    val password: StateFlow<String> = _password.asStateFlow()
-
-    private val _userSaveResult = MutableStateFlow<UserSaveResult?>(null)
-    val userSaveResult: StateFlow<UserSaveResult?> = _userSaveResult.asStateFlow()
-
-
-
-    fun loadUserData() {
-        val fakeUser = User(
-            id = "1",
-            name = "juan perez",
-            username = "juanp",
-            city = "Bogota",
-            email = "juanp@example.com"
+        _users.value = listOf(
+            User(
+                id = "1",
+                name = "Admin",
+                username = "admin",
+                role = Role.ADMIN,
+                city = City.BOGOTA,
+                email = "admin@example.com",
+                password = "admin"
+            ),
+            User(
+                id = "2",
+                name = "Juan Pérez",
+                username = "juanp",
+                role = Role.USER,
+                city = City.ARMENIA,
+                email = "juanp@example.com",
+                password = "pass123"
+            ),
+            User(
+                id = "3",
+                name = "María Gómez",
+                username = "mariag",
+                role = Role.USER,
+                city = City.PEREIRA,
+                email = "mariag@example.com",
+                password = "pass456"
+            )
         )
 
-        // Populate StateFlows with fixed data
-        _name.value = fakeUser.name
-        _username.value = fakeUser.username
-        _email.value = fakeUser.email
-        _city.value = fakeUser.city
-
-        // Reset any previous save results
-        _userSaveResult.value = null
     }
 
-
-
-    fun onNameChange(newValue: String) { _name.value = newValue }
-    fun onUsernameChange(newValue: String) { _username.value = newValue }
-    fun onEmailChange(newValue: String) { _email.value = newValue }
-    fun onCityChange(newValue: String) { _city.value = newValue }
-    fun onPasswordChange(newValue: String) { _password.value = newValue }
-
-
-    fun saveUser() {
-        _userSaveResult.value =
-            if (_name.value.isBlank() || _username.value.isBlank() ||
-                _email.value.isBlank() || _city.value.isBlank() ||
-                _password.value.isBlank()
-            ) {
-                UserSaveResult.Error
-            } else {
-                UserSaveResult.Success
-            }
-        println("User Created: Name=${_name.value}")
+    fun create(user: User){
+        _users.value = _users.value + user
     }
 
-
-    fun updateUser() {
-
-        _userSaveResult.value =
-            if (_name.value.isBlank() || _username.value.isBlank() || _city.value.isBlank()) {
-                UserSaveResult.Error
-            } else {
-                UserSaveResult.Success
-            }
-        println("User Updated: Name=${_name.value}")
+    fun findById(id: String): User?{
+        return _users.value.find { it.id == id }
     }
+
+    fun findByEmail(email: String): User?{
+        return _users.value.find { it.email == email }
+    }
+
+    fun login(username: String, password: String): User?{
+        return _users.value.find { it.username == username && it.password == password }
+    }
+
 }

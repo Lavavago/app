@@ -25,8 +25,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.myapplication.model.Role
 import com.example.myapplication.R
-import com.example.myapplication.viewmodel.LoginViewModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -39,17 +39,24 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import com.example.myapplication.viewmodel.UsersViewModel
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.mutableStateOf
+import android.widget.Toast
 
 @Composable
 fun LoginScreen(
-    loginViewModel: LoginViewModel = viewModel(),
-    onNavigateToHome: () -> Unit,
+    onNavigateToHome: (String, Role) -> Unit,
     onNavigateToCreateUser: () -> Unit
 ) {
-    val username by loginViewModel.username.collectAsState()
-    val password by loginViewModel.password.collectAsState()
-    val loginResult by loginViewModel.loginResult.collectAsState()
-    val isLoginSuccessful by loginViewModel.isLoginSuccessful.collectAsState()
+    val usersViewModel = LocalMainViewModel.current.usersViewModel
+
+    var username by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -80,7 +87,7 @@ fun LoginScreen(
         ) {
             CustomTextField(
                 value = username,
-                onValueChange = { loginViewModel.onUsernameChange(it) },
+                onValueChange = { username = it },
                 placeholder = stringResource(id = R.string.username_hint) // 👈 CAMBIO
             )
         }
@@ -95,7 +102,7 @@ fun LoginScreen(
         ) {
             CustomTextField(
                 value = password,
-                onValueChange = { loginViewModel.onPasswordChange(it) },
+                onValueChange = { password = it },
                 placeholder = stringResource(id = R.string.password_hint), // 👈 CAMBIO
                 visualTransformation = PasswordVisualTransformation()
             )
@@ -124,17 +131,31 @@ fun LoginScreen(
                 .padding(horizontal = 24.dp)
         ) {
             CustomButton(
-                onClick = { loginViewModel.validateLogin(context) },
+                onClick = {
+                    val userLogged = usersViewModel.login(username,password)
+
+                    if (userLogged != null){
+                        onNavigateToHome(userLogged.id, userLogged.role)
+                        Toast.makeText(context, "Bienvenido", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(
+                            context,
+                            "Correo o contraseña incorrectos",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                          },
                 text = stringResource(id = R.string.login_button),
             )
         }
 
-        LaunchedEffect(isLoginSuccessful) {
+ /*       LaunchedEffect(isLoginSuccessful) {
             if (isLoginSuccessful) {
-                onNavigateToHome()
+                val userLogged = CreateUserViewModel.login(username, password)
+                onNavigateToHome(userLogged.id, userLogged.role)
             }
         }
-
+*/
         TextButton(onClick = { onNavigateToCreateUser() }) {
             Text(
                 text = stringResource(id = R.string.create_account),
@@ -145,7 +166,7 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = loginResult, color = MaterialTheme.colorScheme.error)
+        Text(text = "", color = MaterialTheme.colorScheme.error)
     }
 }
 

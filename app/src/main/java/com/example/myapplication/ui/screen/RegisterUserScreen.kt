@@ -6,7 +6,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,26 +15,39 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.R
 import com.example.myapplication.ui.components.CustomButton
 import com.example.myapplication.ui.components.CustomTextField
-import com.example.myapplication.viewmodel.CreateUserViewModel
-import com.example.myapplication.viewmodel.UserSaveResult
+import com.example.myapplication.ui.components.CustomDropdownT
+
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.example.myapplication.model.City
+import com.example.myapplication.model.DisplayableEnum
+import com.example.myapplication.model.Role
+import com.example.myapplication.model.User
+import java.util.UUID
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Place
+
 
 @Composable
 fun RegisterUserScreen(
-    createUserViewModel: CreateUserViewModel = viewModel(),
-    onLogout: () -> Unit
+    onNavigateToLogin: () -> Unit
 ) {
 
-    val name by createUserViewModel.name.collectAsState()
-    val username by createUserViewModel.username.collectAsState()
-    val email by createUserViewModel.email.collectAsState()
-    val password by createUserViewModel.password.collectAsState()
-    val city by createUserViewModel.city.collectAsState()
+    val usersViewModel = LocalMainViewModel.current.usersViewModel
 
-    val saveResult by createUserViewModel.userSaveResult.collectAsState()
+    var city by remember { mutableStateOf<DisplayableEnum>(City.ARMENIA) }
+    val cities = City.entries
+
+    var name by remember { mutableStateOf("") }
+    var phoneNumber by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -75,7 +87,7 @@ fun RegisterUserScreen(
 
         CustomTextField(
             value = name,
-            onValueChange = { createUserViewModel.onNameChange(it) },
+            onValueChange = { name = it },
             placeholder = stringResource(R.string.name2_label)
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -83,7 +95,7 @@ fun RegisterUserScreen(
 
         CustomTextField(
             value = username,
-            onValueChange = { createUserViewModel.onUsernameChange(it) },
+            onValueChange = { username = it },
             placeholder = stringResource(R.string.username_label)
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -91,7 +103,7 @@ fun RegisterUserScreen(
 
         CustomTextField(
             value = email,
-            onValueChange = { createUserViewModel.onEmailChange(it) },
+            onValueChange = { email = it },
             placeholder = stringResource(R.string.email_label)
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -99,31 +111,47 @@ fun RegisterUserScreen(
 
         CustomTextField(
             value = password,
-            onValueChange = { createUserViewModel.onPasswordChange(it) },
+            onValueChange = { password = it },
             placeholder = stringResource(R.string.password_label),
             visualTransformation = PasswordVisualTransformation()
         )
         Spacer(modifier = Modifier.height(16.dp))
 
 
-        CustomTextField(
-            value = city,
-            onValueChange = { createUserViewModel.onCityChange(it) },
-            placeholder = stringResource(R.string.profile_city)
+        CustomDropdownT(
+            label = stringResource(R.string.txt_city),
+            supportingText = stringResource(R.string.txt_city_error),
+            list = cities,
+            icon = Icons.Outlined.Place,
+            onValueChange = {
+                city = it
+            }
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
 
         CustomButton(
-            onClick = { createUserViewModel.saveUser() },
+            onClick = {
+                val user = User(
+                    id = UUID.randomUUID().toString(),
+                    name = name,
+                    username = email,
+                    city = city as City,
+                    email = email,
+                    role = Role.USER,
+                    password = password
+                )
+                usersViewModel.create(user)
+                onNavigateToLogin()
+                      },
             text = stringResource(R.string.save_user_button) // Usando "Guardar Usuario"
         )
 
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        saveResult?.let { result ->
+        /*saveResult?.let { result ->
             Text(
                 text = when (result) {
                     UserSaveResult.Success -> stringResource(R.string.user_created_success)
@@ -136,12 +164,12 @@ fun RegisterUserScreen(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium
             )
-        }
+        }*/
 
         Spacer(modifier = Modifier.height(16.dp))
 
 
-        TextButton(onClick = onLogout) {
+        TextButton(onClick = onNavigateToLogin) {
             Text(text = stringResource(R.string.profile_return_login))
         }
     }

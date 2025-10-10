@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
 import com.example.myapplication.model.Role
+import com.example.myapplication.model.City
 import com.example.myapplication.model.User
 
 @Composable
@@ -34,11 +35,11 @@ fun ProfileScreen(
 ) {
     // Datos simulados
     val fakeUser = User(
-        id = "1",
+        id = "2",
         name = "Juan Pérez",
         username = "juanp",
         role = Role.ADMIN,
-        city = "Bogotá",
+        city = City.BOGOTA,
         email = "juanp@example.com",
         password = "pass123"
     )
@@ -71,7 +72,7 @@ fun ProfileScreen(
         )
         ProfileDataField(
             label = stringResource(R.string.profile_city),
-            value = fakeUser.city
+            value = fakeUser.city.toString()
         )
         ProfileDataField(
             label = stringResource(R.string.profile_email),
