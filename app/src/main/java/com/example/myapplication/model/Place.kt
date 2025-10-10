@@ -1,7 +1,9 @@
 package com.example.myapplication.model
 
+import java.util.UUID
+
 data class Place (
-    val id: String,
+    val id: String = UUID.randomUUID().toString(),
     val title: String,
     val description: String,
     val address: String,

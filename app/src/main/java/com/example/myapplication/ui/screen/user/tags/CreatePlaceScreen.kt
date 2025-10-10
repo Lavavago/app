@@ -9,45 +9,36 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.R
-import com.example.myapplication.ui.components.CustomDropdown
+import com.example.myapplication.model.PlaceType
 import com.example.myapplication.viewmodel.CreatePlaceViewModel
+import com.example.myapplication.viewmodel.PlacesViewModel
 import com.example.myapplication.viewmodel.SaveResult
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreatePlaceScreen(
     createPlaceViewModel: CreatePlaceViewModel = viewModel(),
+    placesViewModel: PlacesViewModel,
     onClose: () -> Unit = {}
 ) {
-
-    val name by createPlaceViewModel.name.collectAsState()
+    val title by createPlaceViewModel.title.collectAsState()
+    val description by createPlaceViewModel.description.collectAsState()
     val address by createPlaceViewModel.address.collectAsState()
-    val category by createPlaceViewModel.category.collectAsState()
     val phone by createPlaceViewModel.phone.collectAsState()
-    val schedule by createPlaceViewModel.schedule.collectAsState()
-    val location by createPlaceViewModel.location.collectAsState()
     val photos by createPlaceViewModel.photos.collectAsState()
+    val schedule by createPlaceViewModel.schedule.collectAsState()
+    val selectedType by createPlaceViewModel.type.collectAsState()
     val saveResult by createPlaceViewModel.saveResult.collectAsState()
-
-
-    val categoryOptions = stringArrayResource(id = R.array.category_options).toList()
-    val scheduleOptions = stringArrayResource(id = R.array.schedule_options).toList()
-    val locationOptions = stringArrayResource(id = R.array.location_options).toList()
-    val photosOptions = stringArrayResource(id = R.array.photos_options).toList()
-
 
     Scaffold { paddingValues ->
         Column(
@@ -58,15 +49,15 @@ fun CreatePlaceScreen(
                 .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-
+            // Encabezado
             Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
                 Row(verticalAlignment = Alignment.CenterVertically) {
-
                     Image(
                         painter = painterResource(id = R.drawable.gps2),
                         contentDescription = stringResource(R.string.location_icon_desc),
@@ -81,12 +72,18 @@ fun CreatePlaceScreen(
                     )
                 }
                 IconButton(onClick = onClose) {
-                    Icon(imageVector = Icons.Filled.Close, contentDescription = stringResource(R.string.txt_back))
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = stringResource(R.string.txt_back)
+                    )
                 }
             }
 
+            // Título de la sección
             Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -95,105 +92,98 @@ fun CreatePlaceScreen(
                     fontWeight = FontWeight.Normal,
                     modifier = Modifier.weight(1f)
                 )
-                Icon(imageVector = Icons.Filled.Create, contentDescription = stringResource(R.string.edit_profile), tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
+                Icon(
+                    imageVector = Icons.Filled.Create,
+                    contentDescription = stringResource(R.string.edit_profile),
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                )
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            //Campos del formulario
+            CustomTextField(value = title, onValueChange = createPlaceViewModel::onTitleChange, placeholder = "Nombre del lugar")
+            Spacer(modifier = Modifier.height(16.dp))
+
+            CustomTextField(value = description, onValueChange = createPlaceViewModel::onDescriptionChange, placeholder = "Descripción")
+            Spacer(modifier = Modifier.height(16.dp))
+
+            CustomTextField(value = address, onValueChange = createPlaceViewModel::onAddressChange, placeholder = "Dirección")
+            Spacer(modifier = Modifier.height(16.dp))
+
+            CustomTextField(value = phone, onValueChange = createPlaceViewModel::onPhoneChange, placeholder = "Teléfono")
+            Spacer(modifier = Modifier.height(16.dp))
 
 
             Spacer(modifier = Modifier.height(8.dp))
 
-
-            CustomTextField(
-                value = name,
-                onValueChange = createPlaceViewModel::onNameChange,
-                placeholder = stringResource(R.string.name_label)
+            ScheduleDropdown(
+                selectedSchedule = schedule,
+                onScheduleSelected = createPlaceViewModel::onScheduleChange
             )
+
             Spacer(modifier = Modifier.height(16.dp))
 
-
-            CustomTextField(
-                value = address,
-                onValueChange = createPlaceViewModel::onAddressChange,
-                placeholder = stringResource(R.string.address_label)
-            )
+            CustomTextField(value = photos, onValueChange = createPlaceViewModel::onPhotosChange, placeholder = "URL de foto")
             Spacer(modifier = Modifier.height(16.dp))
 
-
-            CustomDropdown(
-                label = stringResource(R.string.category_label),
-                list = categoryOptions,
-                onValueChange = createPlaceViewModel::onCategoryChange,
-                initialValue = category
+            // Selector de tipo
+            Text(
+                text = "Tipo de lugar",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(16.dp))
-
-
-            CustomTextField(
-                value = phone,
-                onValueChange = createPlaceViewModel::onPhoneChange,
-                placeholder = stringResource(R.string.phone_label)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-
-            CustomDropdown(
-                label = stringResource(R.string.schedule_label),
-                list = scheduleOptions,
-                onValueChange = createPlaceViewModel::onScheduleChange,
-                initialValue = schedule
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-
-            CustomDropdown(
-                label = stringResource(R.string.map_location_label),
-                list = locationOptions,
-                onValueChange = createPlaceViewModel::onLocationChange,
-                initialValue = location
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-
-            CustomDropdown(
-                label = stringResource(R.string.photos_label),
-                list = photosOptions,
-                onValueChange = createPlaceViewModel::onPhotosChange,
-                initialValue = photos
+            Spacer(modifier = Modifier.height(8.dp))
+            PlaceTypeSelector(
+                selectedType = selectedType,
+                onTypeSelected = { createPlaceViewModel.onTypeChange(it) }
             )
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
-
+            // Botón para guardar
             Button(
-                onClick = createPlaceViewModel::savePlace,
-                modifier = Modifier.fillMaxWidth().height(50.dp).padding(horizontal = 40.dp),
+                onClick = {
+                    createPlaceViewModel.savePlace()
+                    placesViewModel.loadPlaces()
+                    onClose()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .padding(horizontal = 40.dp),
                 shape = RoundedCornerShape(25.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
             ) {
                 Text(
-                    text = stringResource(R.string.add_button),
+                    text = "Guardar lugar",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold
                 )
             }
 
-
+            // Resultado
             if (saveResult != null) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = when (saveResult) {
-                        is SaveResult.Success -> stringResource(R.string.place_saved_success) + " (Revisa la consola)"
-                        is SaveResult.Error -> stringResource(R.string.place_saved_error)
+                        is SaveResult.Success -> " Lugar guardado correctamente"
+                        is SaveResult.Error -> " Por favor, completa todos los campos"
                         else -> ""
                     },
-                    color = if (saveResult is SaveResult.Success) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                    color = if (saveResult is SaveResult.Success)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(bottom = 20.dp)
                 )
             }
+
             Spacer(modifier = Modifier.height(30.dp))
         }
     }
 }
-
 
 @Composable
 fun CustomTextField(
@@ -207,7 +197,6 @@ fun CustomTextField(
         placeholder = { Text(placeholder) },
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        label = null,
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.surface,
             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -216,4 +205,82 @@ fun CustomTextField(
             unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
         )
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ScheduleDropdown(
+    selectedSchedule: String,
+    onScheduleSelected: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    val scheduleOptions = listOf(
+        "Lunes - Viernes 8:00 AM - 8:00 PM",
+        "Sábados - Domingos - Festivos 9:00 AM - 6:00 PM",
+        "Abierto 24 horas",
+        "Solo fines de semana"
+    )
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        TextField(
+            value = selectedSchedule,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Selecciona un horario") },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            scheduleOptions.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        onScheduleSelected(option)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun PlaceTypeSelector(
+    selectedType: PlaceType,
+    onTypeSelected: (PlaceType) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box {
+        Button(onClick = { expanded = !expanded }) {
+            Text(text = selectedType.name)
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            PlaceType.values().forEach { type ->
+                DropdownMenuItem(
+                    text = { Text(type.name) },
+                    onClick = {
+                        onTypeSelected(type)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
 }

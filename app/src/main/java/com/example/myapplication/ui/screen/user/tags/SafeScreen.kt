@@ -1,17 +1,7 @@
 package com.example.myapplication.ui.screen.user.tags
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,7 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,27 +24,114 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.myapplication.model.Place
+import com.example.myapplication.viewmodel.CreatePlaceViewModel
 import com.example.myapplication.viewmodel.PlacesViewModel
 
 @Composable
 fun SafeScreen(
     padding: PaddingValues,
     placesViewModel: PlacesViewModel,
-    onNavigateToCreatePlace: (String) -> Unit
+    createPlaceViewModel: CreatePlaceViewModel,
+    onNavigateToCreatePlace: () -> Unit,
+    onPlaceClick: (String) -> Unit
 ) {
     val places by placesViewModel.places.collectAsState()
+    val createdPlaces by createPlaceViewModel.places.collectAsState()
 
     LazyColumn(
-        modifier = Modifier.padding(padding)
+        modifier = Modifier
+            .padding(padding)
+            .fillMaxSize()
     ) {
+
+        // Sección de lugares favoritos
+        item {
+            Text(
+                text = "Lugares favoritos",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+
         items(places) { place ->
             PlaceItem(
                 place = place,
-                onClick = { onNavigateToCreatePlace(place.id) }
+                onClick = { onPlaceClick(place.id) } // ahora navega al detalle
             )
+        }
+
+        // Nueva sección: Mis lugares creados
+        if (createdPlaces.isNotEmpty()) {
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = "Mis lugares creados",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+
+            items(createdPlaces) { created ->
+                CreatedPlaceItem(
+                    place = created,
+                    onClick = {
+                        // Si el lugar tiene ID, navega al detalle igual que los favoritos
+                        onPlaceClick(created.id)
+                    }
+                )
+            }
         }
     }
 }
+
+@Composable
+fun CreatedPlaceItem(
+    place: com.example.myapplication.model.Place,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = place.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = place.address,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
+            )
+            Text(
+                text = place.type.displayName,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color(0xFF00796B)
+            )
+        }
+
+        AsyncImage(
+            model = place.images.firstOrNull(),
+            contentDescription = place.title,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(70.dp)
+                .clip(RoundedCornerShape(10.dp))
+        )
+    }
+
+    Divider(color = Color.LightGray.copy(alpha = 0.3f))
+}
+
+
 
 @Composable
 fun PlaceItem(
@@ -69,7 +145,7 @@ fun PlaceItem(
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Columna con textos a la izquierda
+        // Columna con textos
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -87,7 +163,6 @@ fun PlaceItem(
                 color = Color.Gray
             )
 
-            // ⭐ Rating fijo como en tu ejemplo (4.5)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "4,0",
@@ -111,14 +186,12 @@ fun PlaceItem(
                 )
             }
 
-            // Dirección
             Text(
                 text = "${place.type.displayName} - ${place.address}",
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray
             )
 
-            // Estado (cerrado fijo, podrías usar schedules más adelante)
             Text(
                 text = "Cerrado",
                 style = MaterialTheme.typography.bodySmall,
@@ -127,7 +200,6 @@ fun PlaceItem(
             )
         }
 
-        // Imagen a la derecha
         AsyncImage(
             model = place.images.firstOrNull(),
             contentDescription = place.title,

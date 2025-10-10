@@ -6,13 +6,13 @@ enum class PlaceType(
     RESTAURANTE("Restaurante"),
     BAR("Bar"),
     HOTEL("Hotel"),
-    PARK("Parque"),
-    SHOPPING_MALL("Tienda"),
+    PARQUE("Parque"),
+    TIENDA("Tienda"),
     CAFE("Cafetería"),
     MUSEO("Museo"),
     CINE("Cine"),
     BIBLIOTECA("Biblioteca"),
     GIMNASIO("Gimnasio"),
     SUPERMERCADO("Supermercado"),
-    OTHER("Otro")
+    OTROS("Otro")
 }

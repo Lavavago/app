@@ -1,6 +1,7 @@
 package com.example.myapplication.ui.screen.user.tags
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -11,40 +12,40 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.myapplication.R
+import com.example.myapplication.viewmodel.PlacesViewModel
 import com.example.myapplication.ui.screen.user.nav.RouteTab
 
 @Composable
-fun inicio(navController: NavController) {
+fun inicio(navController: NavController, placesViewModel: PlacesViewModel = viewModel()) {
     Column(modifier = Modifier.fillMaxSize()) {
 
         TopSearchAndFilterSection(
             modifier = Modifier.fillMaxWidth(),
-            navController = navController
+            navController = navController,
+            placesViewModel = placesViewModel
         )
-
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
                 .padding(horizontal = 16.dp, vertical = 8.dp)
-
                 .background(Color(0xFFE0E0E0), RoundedCornerShape(16.dp)),
             contentAlignment = Alignment.Center
         ) {
@@ -57,7 +58,7 @@ fun inicio(navController: NavController) {
         }
 
         Text(
-            text = "Armenia/Quindio",
+            text = "Armenia / Quindío",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(24.dp)
@@ -65,18 +66,30 @@ fun inicio(navController: NavController) {
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopSearchAndFilterSection(modifier: Modifier = Modifier, navController: NavController) {
+fun TopSearchAndFilterSection(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    placesViewModel: PlacesViewModel
+) {
     Column(
         modifier = modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)
     ) {
-        // estado del query y expanded
         var query by rememberSaveable { mutableStateOf("") }
         var expanded by rememberSaveable { mutableStateOf(false) }
 
-        // SearchBar (Material3, experimental)
+        // Observamos los lugares quemados desde el ViewModel
+        val places by placesViewModel.places.collectAsState()
+
+        // Filtramos los lugares en tiempo real
+        val filteredPlaces = remember(query, places) {
+            if (query.isBlank()) places
+            else places.filter {
+                it.title.contains(query, ignoreCase = true)
+            }
+        }
+
         SearchBar(
             modifier = Modifier
                 .fillMaxWidth()
@@ -84,12 +97,12 @@ fun TopSearchAndFilterSection(modifier: Modifier = Modifier, navController: NavC
             inputField = {
                 SearchBarDefaults.InputField(
                     query = query,
-                    onQueryChange = { query = it },
-                    // onSearch recibe el string de la búsqueda
-                    onSearch = { searchQuery ->
+                    onQueryChange = { newQuery ->
+                        query = newQuery
+                        expanded = true // muestra sugerencias al escribir
+                    },
+                    onSearch = {
                         expanded = false
-                        // Aquí ejecutas la lógica de búsqueda con searchQuery o con `query`
-                        // p.e. viewModel.search(searchQuery)
                     },
                     expanded = expanded,
                     onExpandedChange = { expanded = it },
@@ -121,40 +134,84 @@ fun TopSearchAndFilterSection(modifier: Modifier = Modifier, navController: NavC
             expanded = expanded,
             onExpandedChange = { expanded = it }
         ) {
-            // opcional preguntar a laura si se implementa
-            // contenido mostrado al expandir (sugerencias)
-            // Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-               // Text(text = "Sugerencia 1: Café en Armenia")
-               // Spacer(modifier = Modifier.height(6.dp))
-               // Text(text = "Sugerencia 2: Restaurante cerca")
-               // Spacer(modifier = Modifier.height(6.dp))
-               // Text(text = "Sugerencia 3: Museo del Oro")
-            // }
+            // Sugerencias filtradas en tiempo real
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                if (filteredPlaces.isEmpty()) {
+                    Text(
+                        text = "No se encontraron lugares",
+                        color = Color.Gray,
+                        fontSize = 14.sp
+                    )
+                } else {
+                    filteredPlaces.forEach { place ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    query = place.title
+                                    expanded = false
+                                }
+                                .padding(vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Image(
+                                painter = rememberAsyncImagePainter(place.images.firstOrNull()),
+                                contentDescription = place.title,
+                                modifier = Modifier
+                                    .size(45.dp)
+                                    .clip(RoundedCornerShape(10.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+
+                            Spacer(modifier = Modifier.width(10.dp))
+
+                            Column {
+                                Text(
+                                    text = place.title,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 15.sp,
+                                    color = Color.Black
+                                )
+                                Text(
+                                    text = place.description,
+                                    fontSize = 13.sp,
+                                    color = Color.Gray,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                        Divider(color = Color.LightGray, thickness = 0.5.dp)
+                    }
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // --- Chips de Filtro  ---
+        // --- Chips de Filtro ---
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            FilterChip(label = "Restaurante", iconRes = R.drawable.cuchara)
-            FilterChip(label = "Cafetería", iconRes = R.drawable.cafeteria)
-            FilterChip(label = "Museo", iconRes = R.drawable.cuadro)
-            FilterChip(label = "Comida rápida", iconRes = R.drawable.hamburguesa)
-            FilterChip(label = "Hotel", iconRes = R.drawable.recurso)
+            CustomFilterChip(label = "Restaurante", iconRes = R.drawable.cuchara)
+            CustomFilterChip(label = "Cafetería", iconRes = R.drawable.cafeteria)
+            CustomFilterChip(label = "Museo", iconRes = R.drawable.cuadro)
+            CustomFilterChip(label = "Comida rápida", iconRes = R.drawable.hamburguesa)
+            CustomFilterChip(label = "Hotel", iconRes = R.drawable.recurso)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
-
 @Composable
-fun FilterChip(label: String, iconRes: Int) {
+fun CustomFilterChip(label: String, iconRes: Int) {
     var isSelected by remember { mutableStateOf(false) }
 
     Surface(
@@ -162,7 +219,6 @@ fun FilterChip(label: String, iconRes: Int) {
         shape = RoundedCornerShape(50),
         color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
         border = BorderStroke(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else Color.LightGray),
-        // Sombra de Chips (sutil)
         modifier = Modifier.shadow(
             elevation = 1.dp,
             shape = RoundedCornerShape(50),

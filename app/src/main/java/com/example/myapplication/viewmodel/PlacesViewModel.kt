@@ -78,7 +78,7 @@ class PlacesViewModel: ViewModel() {
                 location = Location(1.26, 2.39),
                 images = listOf("https://files.visitbogota.co/drpl/sites/default/files/styles/max_650x650/public/2024-10/Gastronomi%CC%81aParque93_22122022%20%2817%29.jpg?itok=_OtDp9Gw"),
                 phones = listOf(),
-                type = PlaceType.PARK,
+                type = PlaceType.PARQUE,
                 schedules = listOf()
             ),
 

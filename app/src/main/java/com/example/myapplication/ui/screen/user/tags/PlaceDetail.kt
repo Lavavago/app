@@ -45,7 +45,7 @@ fun PlaceDetail(
             .padding(padding)
             .fillMaxSize()
             .background(Color(0xFFF5F3FF)) // fondo morado claro
-            .verticalScroll(rememberScrollState()) // 🔑 scroll activado
+            .verticalScroll(rememberScrollState()) // scroll activado
             .padding(16.dp)
     ) {
         // Header
