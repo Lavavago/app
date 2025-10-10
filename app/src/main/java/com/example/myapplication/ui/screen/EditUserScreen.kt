@@ -24,8 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.myapplication.viewmodel.CreateUserViewModel
-import com.example.myapplication.viewmodel.UserSaveResult
+import com.example.myapplication.viewmodel.UsersViewModel
 import androidx.compose.ui.res.stringResource
 import com.example.myapplication.R
 import androidx.compose.runtime.mutableStateOf
@@ -35,16 +34,16 @@ import androidx.compose.runtime.setValue
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditUserScreen(
-    createUserViewModel: CreateUserViewModel = viewModel(),
+    createUserViewModel: UsersViewModel = viewModel(),
     onBack: () -> Unit
 ) {
     //  Recolección de estados del ViewModel
-    val name by createUserViewModel.name.collectAsState()
+    /*val name by UsersViewModel.name.collectAsState()
     val username by createUserViewModel.username.collectAsState()
     val email by createUserViewModel.email.collectAsState()
     val city by createUserViewModel.city.collectAsState()
     val saveResult by createUserViewModel.userSaveResult.collectAsState()
-
+*/
     var focusedField by remember { mutableStateOf<String?>(null) }
     val primaryColor = MaterialTheme.colorScheme.primary
 
@@ -91,9 +90,9 @@ fun EditUserScreen(
 
 
             FloatingTextField(
-                value = name,
+                value = "",//name,
                 onValueChange = {
-                    createUserViewModel.onNameChange(it)
+                    //createUserViewModel.onNameChange(it)
                     focusedField = "name"
                 },
                 label = stringResource(R.string.profile_full_name),
@@ -104,9 +103,9 @@ fun EditUserScreen(
 
 
             FloatingTextField(
-                value = username,
+                value = "", // username,
                 onValueChange = {
-                    createUserViewModel.onUsernameChange(it)
+                   // createUserViewModel.onUsernameChange(it)
                     focusedField = "username"
                 },
                 label = stringResource(R.string.profile_username),
@@ -117,7 +116,7 @@ fun EditUserScreen(
 
 
             FloatingTextField(
-                value = email,
+                value = "", //email,
                 onValueChange = { /* Ignorado, no es editable */ },
 
                 label = "${stringResource(R.string.profile_email)} ${stringResource(R.string.not_editable)}",
@@ -130,9 +129,9 @@ fun EditUserScreen(
 
 
             FloatingTextField(
-                value = city,
+                value = "", //city,
                 onValueChange = {
-                    createUserViewModel.onCityChange(it)
+                    //createUserViewModel.onCityChange(it)
                     focusedField = "city"
                 },
                 label = stringResource(R.string.profile_city),
@@ -145,14 +144,16 @@ fun EditUserScreen(
 
 
             PurpleButton(
-                onClick = { createUserViewModel.updateUser() },
+                onClick = {
+                    //createUserViewModel.updateUser()
+                          },
                 text = stringResource(R.string.save_changes)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
 
-            saveResult?.let { result ->
+            /*saveResult?.let { result ->
                 Text(
                     text = when(result) {
                         UserSaveResult.Success -> stringResource(R.string.user_updated_success)
@@ -166,7 +167,7 @@ fun EditUserScreen(
                     fontWeight = FontWeight.Bold
                 )
             }
-
+*/
             Spacer(modifier = Modifier.height(32.dp))
         }
     }

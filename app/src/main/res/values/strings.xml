@@ -105,7 +105,9 @@
         <item>5 Fotos o Más</item>
     </string-array>
 
-
+    <string name="title_admin">Inicio administrador</string>
+    <string name="menu_search">Búsqueda</string>
+    <string name="txt_city_error">La ciudad es obligatoria</string>
 
 
 </resources>

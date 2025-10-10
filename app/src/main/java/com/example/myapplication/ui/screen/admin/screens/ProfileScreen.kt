@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.screen.user.tags
+package com.example.myapplication.ui.screen.admin.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -35,13 +35,13 @@ fun ProfileScreen(
 ) {
     // Datos simulados
     val fakeUser = User(
-        id = "2",
-        name = "Juan Pérez",
-        username = "juanp",
+        id = "1",
+        name = "Admin",
+        username = "admin",
         role = Role.ADMIN,
         city = City.BOGOTA,
-        email = "juanp@example.com",
-        password = "pass123"
+        email = "admin@example.com",
+        password = "admin"
     )
 
     Column(
