@@ -1,5 +1,9 @@
 package com.example.myapplication.ui.screen.user.tags
 
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,16 +24,27 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.myapplication.R
 import com.example.myapplication.viewmodel.PlacesViewModel
 import com.example.myapplication.ui.screen.user.nav.RouteTab
+import com.mapbox.geojson.Point
+import com.mapbox.maps.extension.compose.MapEffect
+import com.mapbox.maps.extension.compose.MapboxMap
+import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
+import com.mapbox.maps.extension.compose.annotation.rememberIconImage
+import com.mapbox.maps.plugin.PuckBearing
+import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
+import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.maps.plugin.viewport.data.DefaultViewportTransitionOptions
 
 @Composable
 fun inicio(navController: NavController, placesViewModel: PlacesViewModel = viewModel()) {
@@ -41,6 +56,33 @@ fun inicio(navController: NavController, placesViewModel: PlacesViewModel = view
             placesViewModel = placesViewModel
         )
 
+        val context = LocalContext.current
+
+        val marker = rememberIconImage(
+            key = R.drawable.red_marker,
+            painter = painterResource(id = R.drawable.red_marker)
+
+        )
+
+        var mapViewportState = rememberMapViewportState {
+            setCameraOptions {
+                zoom(7.0)
+                center( Point.fromLngLat(-75.6491181, 4.4687891))
+                pitch(45.0)
+            }
+        }
+
+
+        val hasPermission = rememberLocationPermissionState{
+            Toast.makeText(
+                context,
+                if (it) "Ha conceguido permiso para acceder a su ubicacion" else "No ha concedido permiso para acceder a su ubicacion",
+                Toast.LENGTH_SHORT
+            ).show(
+            )
+        }
+
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -49,12 +91,28 @@ fun inicio(navController: NavController, placesViewModel: PlacesViewModel = view
                 .background(Color(0xFFE0E0E0), RoundedCornerShape(16.dp)),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "Área del Mapa (Placeholder)",
-                color = Color.DarkGray,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold
-            )
+            MapboxMap(
+                Modifier.fillMaxSize(),
+                mapViewportState = mapViewportState
+            ){
+
+                if (hasPermission){
+                    MapEffect(key1 = "follow_puck_location") { mapView ->
+                        mapView.location.updateSettings {
+                            locationPuck = createDefault2DPuck(withBearing = true)
+                            enabled = true
+                            puckBearing = PuckBearing.COURSE
+                            puckBearingEnabled = true
+                        }
+
+                        mapViewportState.transitionToFollowPuckState (
+                            defaultTransitionOptions = DefaultViewportTransitionOptions.Builder().maxDurationMs(0).build()
+                        )
+                    }
+                }
+
+
+            }
         }
 
         Text(
@@ -65,6 +123,36 @@ fun inicio(navController: NavController, placesViewModel: PlacesViewModel = view
         )
     }
 }
+
+@Composable
+fun rememberLocationPermissionState(
+    permission: String = android.Manifest.permission.ACCESS_FINE_LOCATION,
+    onPermissionResult: (Boolean) -> Unit
+): Boolean {
+    val context = LocalContext.current
+    val permissionGranted = remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ){ granted ->
+        permissionGranted.value = granted
+        onPermissionResult(granted)
+    }
+
+    LaunchedEffect(Unit) {
+        if (!permissionGranted.value){
+            launcher.launch(permission)
+        }
+    }
+
+    return permissionGranted.value
+
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
