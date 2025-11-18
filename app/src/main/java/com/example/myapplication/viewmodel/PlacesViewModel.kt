@@ -23,7 +23,7 @@ class PlacesViewModel: ViewModel() {
                 title = "Restaurante El paisa",
                 description = "El mejor restaurante paisa",
                 address = "Cra 12 # 12 - 12",
-                location = Location(1.23, 2.34),
+                location = Location(4.5350, -75.6750), // Armenia centro
                 images = listOf(
                     "https://elbalconpaisa.com/images/about-img-1.png",
                     "https://plazaclaro.com.co/wp-content/uploads/2022/11/EL-PAISA.png",
@@ -39,7 +39,7 @@ class PlacesViewModel: ViewModel() {
                 title = "Bar test",
                 description = "Un bar test",
                 address = "Calle 12 # 12 - 12",
-                location = Location(1.23, 2.34),
+                location = Location(4.5342, -75.6738), // Cerca del parque Sucre
                 images = listOf("https://cdn0.uncomo.com/es/posts/6/8/4/como_gestionar_un_bar_22486_orig.jpg"),
                 phones = listOf("31231321323", "31231321323"),
                 type = PlaceType.BAR,
@@ -51,7 +51,7 @@ class PlacesViewModel: ViewModel() {
                 title = "Café La Tertulia",
                 description = "Un lugar acogedor para tomar café y leer",
                 address = "Carrera 45 # 8-15",
-                location = Location(1.24, 2.36),
+                location = Location(4.5391, -75.6667), // Barrio Laureles
                 images = listOf("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOoBVB7xl9x1Mrg0ErBSiLJr-clQRLZ2dzbg&s"),
                 phones = listOf("3101111111"),
                 type = PlaceType.CAFE,
@@ -63,7 +63,7 @@ class PlacesViewModel: ViewModel() {
                 title = "Hotel Central",
                 description = "Hotel en el centro de la ciudad",
                 address = "Calle 10 # 5-20",
-                location = Location(1.25, 2.38),
+                location = Location(4.5338, -75.6758), // Centro de Armenia
                 images = listOf("https://q-xx.bstatic.com/xdata/images/hotel/max500/577544456.jpg?k=f59674cc3f80cd041a036e733539d0b990f7ad5c66b84bc1f95ec93771e44622&o="),
                 phones = listOf("3142222222"),
                 type = PlaceType.HOTEL,
@@ -75,7 +75,7 @@ class PlacesViewModel: ViewModel() {
                 title = "Parque de la 93",
                 description = "Espacio verde para disfrutar en familia",
                 address = "Calle 93 # 13-00",
-                location = Location(1.26, 2.39),
+                location = Location(4.5539, -75.6640), // Cerca Portal del Quindío (ubicación real alternativa)
                 images = listOf("https://files.visitbogota.co/drpl/sites/default/files/styles/max_650x650/public/2024-10/Gastronomi%CC%81aParque93_22122022%20%2817%29.jpg?itok=_OtDp9Gw"),
                 phones = listOf(),
                 type = PlaceType.PARQUE,
@@ -87,7 +87,7 @@ class PlacesViewModel: ViewModel() {
                 title = "Museo del Oro",
                 description = "Museo icónico de la ciudad",
                 address = "Cra 6 # 15-88",
-                location = Location(1.27, 2.40),
+                location = Location(4.5361, -75.6735), // Cerca al centro cultural metropolitano
                 images = listOf("https://d3nmwx7scpuzgc.cloudfront.net/sites/default/files/pagina_basica/museo-de-oro-bogota-fachada-2021-640x400.jpg"),
                 phones = listOf("6013432222"),
                 type = PlaceType.MUSEO,
@@ -99,7 +99,7 @@ class PlacesViewModel: ViewModel() {
                 title = "Cinemark Centro",
                 description = "Cine moderno con múltiples salas",
                 address = "Av 7 # 45-60",
-                location = Location(1.28, 2.41),
+                location = Location(4.5404, -75.6649), // Portal del Quindío (mall real)
                 images = listOf("https://assets.cinemark-core.com/5db771be04daec00076df3f5/vista/theaters/5e1b8b5927e07b0008e8fcd3/mobile/micentro-el-porvenir-2407-1580134677948.jpg"),
                 phones = listOf("3153333333"),
                 type = PlaceType.CINE,
@@ -111,7 +111,7 @@ class PlacesViewModel: ViewModel() {
                 title = "Biblioteca Nacional",
                 description = "La biblioteca más grande del país",
                 address = "Calle 24 # 5-60",
-                location = Location(1.29, 2.42),
+                location = Location(4.5377, -75.6753), // Cerca Universidad del Quindío
                 images = listOf("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQPdhL0OBim5xj0uppW2fPjRnq4X6WcUc0nOQ&s"),
                 phones = listOf("6015656565"),
                 type = PlaceType.BIBLIOTECA,
@@ -119,6 +119,7 @@ class PlacesViewModel: ViewModel() {
             )
         )
     }
+
 
 
     fun addPlace(place: Place) {

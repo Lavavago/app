@@ -34,6 +34,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.myapplication.R
+import com.example.myapplication.ui.components.Map
+import com.example.myapplication.ui.screen.LocalMainViewModel
 import com.example.myapplication.viewmodel.PlacesViewModel
 import com.example.myapplication.ui.screen.user.nav.RouteTab
 import com.mapbox.geojson.Point
@@ -56,32 +58,8 @@ fun inicio(navController: NavController, placesViewModel: PlacesViewModel = view
             placesViewModel = placesViewModel
         )
 
-        val context = LocalContext.current
-
-        val marker = rememberIconImage(
-            key = R.drawable.red_marker,
-            painter = painterResource(id = R.drawable.red_marker)
-
-        )
-
-        var mapViewportState = rememberMapViewportState {
-            setCameraOptions {
-                zoom(7.0)
-                center( Point.fromLngLat(-75.6491181, 4.4687891))
-                pitch(45.0)
-            }
-        }
-
-
-        val hasPermission = rememberLocationPermissionState{
-            Toast.makeText(
-                context,
-                if (it) "Ha conceguido permiso para acceder a su ubicacion" else "No ha concedido permiso para acceder a su ubicacion",
-                Toast.LENGTH_SHORT
-            ).show(
-            )
-        }
-
+        val placesViewModel = LocalMainViewModel.current.placesViewModel
+        val places by placesViewModel.places.collectAsState()
 
         Box(
             modifier = Modifier
@@ -91,28 +69,12 @@ fun inicio(navController: NavController, placesViewModel: PlacesViewModel = view
                 .background(Color(0xFFE0E0E0), RoundedCornerShape(16.dp)),
             contentAlignment = Alignment.Center
         ) {
-            MapboxMap(
-                Modifier.fillMaxSize(),
-                mapViewportState = mapViewportState
-            ){
 
-                if (hasPermission){
-                    MapEffect(key1 = "follow_puck_location") { mapView ->
-                        mapView.location.updateSettings {
-                            locationPuck = createDefault2DPuck(withBearing = true)
-                            enabled = true
-                            puckBearing = PuckBearing.COURSE
-                            puckBearingEnabled = true
-                        }
+            Map (
+                places = places,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-                        mapViewportState.transitionToFollowPuckState (
-                            defaultTransitionOptions = DefaultViewportTransitionOptions.Builder().maxDurationMs(0).build()
-                        )
-                    }
-                }
-
-
-            }
         }
 
         Text(
@@ -122,35 +84,6 @@ fun inicio(navController: NavController, placesViewModel: PlacesViewModel = view
             modifier = Modifier.padding(24.dp)
         )
     }
-}
-
-@Composable
-fun rememberLocationPermissionState(
-    permission: String = android.Manifest.permission.ACCESS_FINE_LOCATION,
-    onPermissionResult: (Boolean) -> Unit
-): Boolean {
-    val context = LocalContext.current
-    val permissionGranted = remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
-        )
-    }
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ){ granted ->
-        permissionGranted.value = granted
-        onPermissionResult(granted)
-    }
-
-    LaunchedEffect(Unit) {
-        if (!permissionGranted.value){
-            launcher.launch(permission)
-        }
-    }
-
-    return permissionGranted.value
-
 }
 
 

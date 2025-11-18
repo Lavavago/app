@@ -10,8 +10,10 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -20,9 +22,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.R
 import com.example.myapplication.model.PlaceType
+import com.example.myapplication.ui.components.Map
 import com.example.myapplication.viewmodel.CreatePlaceViewModel
 import com.example.myapplication.viewmodel.PlacesViewModel
 import com.example.myapplication.viewmodel.SaveResult
+import com.mapbox.geojson.Point
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,6 +35,9 @@ fun CreatePlaceScreen(
     placesViewModel: PlacesViewModel,
     onClose: () -> Unit = {}
 ) {
+
+    var clickedPoint by rememberSaveable { mutableStateOf<Point?>(null) }
+
     val title by createPlaceViewModel.title.collectAsState()
     val description by createPlaceViewModel.description.collectAsState()
     val address by createPlaceViewModel.address.collectAsState()
@@ -39,6 +46,20 @@ fun CreatePlaceScreen(
     val schedule by createPlaceViewModel.schedule.collectAsState()
     val selectedType by createPlaceViewModel.type.collectAsState()
     val saveResult by createPlaceViewModel.saveResult.collectAsState()
+
+    LaunchedEffect(saveResult) {
+        if (saveResult is SaveResult.Success) {
+
+            // Ya está creado, simplemente agréguelo
+            val place = createPlaceViewModel.places.value.lastOrNull()
+            if (place != null) {
+                placesViewModel.addPlace(place)
+            }
+
+            onClose()
+        }
+    }
+
 
     Scaffold { paddingValues ->
         Column(
@@ -49,6 +70,7 @@ fun CreatePlaceScreen(
                 .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+
             // Encabezado
             Row(
                 modifier = Modifier
@@ -79,7 +101,7 @@ fun CreatePlaceScreen(
                 }
             }
 
-            // Título de la sección
+            // Título
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -99,9 +121,7 @@ fun CreatePlaceScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            //Campos del formulario
+            // FORMULARIO
             CustomTextField(value = title, onValueChange = createPlaceViewModel::onTitleChange, placeholder = "Nombre del lugar")
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -114,20 +134,15 @@ fun CreatePlaceScreen(
             CustomTextField(value = phone, onValueChange = createPlaceViewModel::onPhoneChange, placeholder = "Teléfono")
             Spacer(modifier = Modifier.height(16.dp))
 
-
-            Spacer(modifier = Modifier.height(8.dp))
-
             ScheduleDropdown(
                 selectedSchedule = schedule,
                 onScheduleSelected = createPlaceViewModel::onScheduleChange
             )
-
             Spacer(modifier = Modifier.height(16.dp))
 
             CustomTextField(value = photos, onValueChange = createPlaceViewModel::onPhotosChange, placeholder = "URL de foto")
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Selector de tipo
             Text(
                 text = "Tipo de lugar",
                 fontSize = 16.sp,
@@ -135,20 +150,59 @@ fun CreatePlaceScreen(
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
+
             PlaceTypeSelector(
                 selectedType = selectedType,
                 onTypeSelected = { createPlaceViewModel.onTypeChange(it) }
             )
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // Botón para guardar
+            // ============================
+            //        MAPA
+            // ============================
+            Text(
+                text = "Ubicación",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp)
+            )
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(260.dp),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(4.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pointerInput(Unit) {}
+                ) {
+                    Map(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(6.dp),
+                        activateClik = true,
+                        onMapClickListener = { point ->
+                            clickedPoint = point
+                            createPlaceViewModel.onLocationChange(point.latitude(), point.longitude())
+                        }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(25.dp))
+
+            // BOTÓN GUARDAR
             Button(
-                onClick = {
-                    createPlaceViewModel.savePlace()
-                    placesViewModel.loadPlaces()
-                    onClose()
-                },
+                onClick = { createPlaceViewModel.savePlace() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
@@ -163,13 +217,12 @@ fun CreatePlaceScreen(
                 )
             }
 
-            // Resultado
             if (saveResult != null) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = when (saveResult) {
-                        is SaveResult.Success -> " Lugar guardado correctamente"
-                        is SaveResult.Error -> " Por favor, completa todos los campos"
+                        is SaveResult.Success -> "Lugar guardado correctamente"
+                        is SaveResult.Error -> "Por favor, completa todos los campos y selecciona la ubicación"
                         else -> ""
                     },
                     color = if (saveResult is SaveResult.Success)
@@ -197,13 +250,7 @@ fun CustomTextField(
         placeholder = { Text(placeholder) },
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = MaterialTheme.colorScheme.surface,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-            disabledContainerColor = MaterialTheme.colorScheme.surface,
-            focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-            unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-        )
+        colors = OutlinedTextFieldDefaults.colors()
     )
 }
 
@@ -222,27 +269,19 @@ fun ScheduleDropdown(
         "Solo fines de semana"
     )
 
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
-    ) {
+    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
         TextField(
             value = selectedSchedule,
             onValueChange = {},
             readOnly = true,
             label = { Text("Selecciona un horario") },
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-            },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .menuAnchor()
                 .fillMaxWidth()
         )
 
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             scheduleOptions.forEach { option ->
                 DropdownMenuItem(
                     text = { Text(option) },
@@ -268,10 +307,7 @@ fun PlaceTypeSelector(
             Text(text = selectedType.name)
         }
 
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             PlaceType.values().forEach { type ->
                 DropdownMenuItem(
                     text = { Text(type.name) },

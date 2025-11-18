@@ -15,7 +15,6 @@ sealed class SaveResult {
 
 class CreatePlaceViewModel : ViewModel() {
 
-    // Campos del formulario
     private val _title = MutableStateFlow("")
     val title: StateFlow<String> = _title.asStateFlow()
 
@@ -31,21 +30,14 @@ class CreatePlaceViewModel : ViewModel() {
     private val _photos = MutableStateFlow("")
     val photos: StateFlow<String> = _photos.asStateFlow()
 
-    // Campo del horario seleccionado
     private val _schedule = MutableStateFlow("")
     val schedule: StateFlow<String> = _schedule.asStateFlow()
 
-    // Lista de horarios predefinidos
-    val availableSchedules = listOf(
-        "Lunes - Viernes 8:00AM - 8:00PM",
-        "Sábados - Domingos - Festivos 9:00AM - 6:00PM",
-        "24 Horas",
-        "Cerrado temporalmente"
-    )
-
-    // Tipo del lugar
     private val _type = MutableStateFlow(PlaceType.RESTAURANTE)
     val type: StateFlow<PlaceType> = _type.asStateFlow()
+
+    private val _location = MutableStateFlow<Location?>(null)
+    val location: StateFlow<Location?> = _location.asStateFlow()
 
     private val _saveResult = MutableStateFlow<SaveResult?>(null)
     val saveResult: StateFlow<SaveResult?> = _saveResult.asStateFlow()
@@ -53,7 +45,7 @@ class CreatePlaceViewModel : ViewModel() {
     private val _places = MutableStateFlow<List<Place>>(emptyList())
     val places: StateFlow<List<Place>> = _places.asStateFlow()
 
-    // Métodos para actualizar los campos
+
     fun onTitleChange(value: String) { _title.value = value }
     fun onDescriptionChange(value: String) { _description.value = value }
     fun onAddressChange(value: String) { _address.value = value }
@@ -62,20 +54,29 @@ class CreatePlaceViewModel : ViewModel() {
     fun onScheduleChange(value: String) { _schedule.value = value }
     fun onTypeChange(value: PlaceType) { _type.value = value }
 
-    // Guardar lugar
-    fun savePlace() {
-        if (_title.value.isBlank() || _description.value.isBlank() || _address.value.isBlank() ||
-            _phone.value.isBlank() || _photos.value.isBlank() || _schedule.value.isBlank()
+    fun onLocationChange(lat: Double, lng: Double) {
+        _location.value = Location(latitude = lat, longitude = lng)
+    }
+
+    fun savePlace(): Place? {
+
+        if (_title.value.isBlank() ||
+            _description.value.isBlank() ||
+            _address.value.isBlank() ||
+            _phone.value.isBlank() ||
+            _photos.value.isBlank() ||
+            _schedule.value.isBlank() ||
+            _location.value == null
         ) {
             _saveResult.value = SaveResult.Error
-            return
+            return null
         }
 
         val newPlace = Place(
             title = _title.value,
             description = _description.value,
             address = _address.value,
-            location = Location(latitude = 0.0, longitude = 0.0),
+            location = _location.value!!,
             images = listOf(_photos.value),
             phones = listOf(_phone.value),
             type = _type.value,
@@ -84,15 +85,9 @@ class CreatePlaceViewModel : ViewModel() {
 
         _places.value = _places.value + newPlace
 
-        // Limpiar campos
-        _title.value = ""
-        _description.value = ""
-        _address.value = ""
-        _phone.value = ""
-        _photos.value = ""
-        _schedule.value = ""
-        _type.value = PlaceType.RESTAURANTE
-
         _saveResult.value = SaveResult.Success
+
+        return newPlace
     }
+
 }
