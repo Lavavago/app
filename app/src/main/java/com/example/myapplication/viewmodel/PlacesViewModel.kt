@@ -1,6 +1,7 @@
 package com.example.myapplication.viewmodel
 
 import androidx.lifecycle.ViewModel
+import com.example.myapplication.model.DayOfWeek // ¡IMPORTANTE!
 import com.example.myapplication.model.Location
 import com.example.myapplication.model.Place
 import com.example.myapplication.model.PlaceType
@@ -31,7 +32,17 @@ class PlacesViewModel: ViewModel() {
                 ),
                 phones = listOf("31231321323", "31231321323"),
                 type = PlaceType.RESTAURANTE,
-                schedules = listOf("Lunes - Viernes: 8:00 AM - 10:00 PM", "Sábado - Domingo: 9:00 AM - 11:00 PM")
+                // --- CÓDIGO CORREGIDO: Usando Map<DayOfWeek, String> ---
+                schedules = mapOf(
+                    DayOfWeek.LUNES to "8:00 AM - 10:00 PM",
+                    DayOfWeek.MARTES to "8:00 AM - 10:00 PM",
+                    DayOfWeek.MIERCOLES to "8:00 AM - 10:00 PM",
+                    DayOfWeek.JUEVES to "8:00 AM - 10:00 PM",
+                    DayOfWeek.VIERNES to "8:00 AM - 10:00 PM",
+                    DayOfWeek.SABADO to "9:00 AM - 11:00 PM",
+                    DayOfWeek.DOMINGO to "9:00 AM - 11:00 PM"
+                )
+                // --------------------------------------------------------
             ),
 
             Place(
@@ -43,7 +54,7 @@ class PlacesViewModel: ViewModel() {
                 images = listOf("https://cdn0.uncomo.com/es/posts/6/8/4/como_gestionar_un_bar_22486_orig.jpg"),
                 phones = listOf("31231321323", "31231321323"),
                 type = PlaceType.BAR,
-                schedules = listOf()
+                schedules = emptyMap() // Corregido: Usando emptyMap()
             ),
 
             Place(
@@ -55,7 +66,11 @@ class PlacesViewModel: ViewModel() {
                 images = listOf("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOoBVB7xl9x1Mrg0ErBSiLJr-clQRLZ2dzbg&s"),
                 phones = listOf("3101111111"),
                 type = PlaceType.CAFE,
-                schedules = listOf()
+                schedules = mapOf(
+                    DayOfWeek.LUNES to "Cerrado",
+                    DayOfWeek.MARTES to "7:00 AM - 5:00 PM",
+                    DayOfWeek.SABADO to "9:00 AM - 1:00 PM"
+                ) // Ejemplo de horarios parciales
             ),
 
             Place(
@@ -67,7 +82,15 @@ class PlacesViewModel: ViewModel() {
                 images = listOf("https://q-xx.bstatic.com/xdata/images/hotel/max500/577544456.jpg?k=f59674cc3f80cd041a036e733539d0b990f7ad5c66b84bc1f95ec93771e44622&o="),
                 phones = listOf("3142222222"),
                 type = PlaceType.HOTEL,
-                schedules = listOf()
+                schedules = mapOf(
+                    DayOfWeek.LUNES to "24 Horas",
+                    DayOfWeek.MARTES to "24 Horas",
+                    DayOfWeek.MIERCOLES to "24 Horas",
+                    DayOfWeek.JUEVES to "24 Horas",
+                    DayOfWeek.VIERNES to "24 Horas",
+                    DayOfWeek.SABADO to "24 Horas",
+                    DayOfWeek.DOMINGO to "24 Horas"
+                )
             ),
 
             Place(
@@ -79,7 +102,7 @@ class PlacesViewModel: ViewModel() {
                 images = listOf("https://files.visitbogota.co/drpl/sites/default/files/styles/max_650x650/public/2024-10/Gastronomi%CC%81aParque93_22122022%20%2817%29.jpg?itok=_OtDp9Gw"),
                 phones = listOf(),
                 type = PlaceType.PARQUE,
-                schedules = listOf()
+                schedules = emptyMap() // Corregido: Usando emptyMap()
             ),
 
             Place(
@@ -91,7 +114,14 @@ class PlacesViewModel: ViewModel() {
                 images = listOf("https://d3nmwx7scpuzgc.cloudfront.net/sites/default/files/pagina_basica/museo-de-oro-bogota-fachada-2021-640x400.jpg"),
                 phones = listOf("6013432222"),
                 type = PlaceType.MUSEO,
-                schedules = listOf()
+                schedules = mapOf(
+                    DayOfWeek.LUNES to "Cerrado",
+                    DayOfWeek.MARTES to "9:00 AM - 5:00 PM",
+                    DayOfWeek.MIERCOLES to "9:00 AM - 5:00 PM",
+                    DayOfWeek.JUEVES to "9:00 AM - 5:00 PM",
+                    DayOfWeek.VIERNES to "9:00 AM - 5:00 PM",
+                    DayOfWeek.SABADO to "10:00 AM - 6:00 PM"
+                )
             ),
 
             Place(
@@ -103,7 +133,15 @@ class PlacesViewModel: ViewModel() {
                 images = listOf("https://assets.cinemark-core.com/5db771be04daec00076df3f5/vista/theaters/5e1b8b5927e07b0008e8fcd3/mobile/micentro-el-porvenir-2407-1580134677948.jpg"),
                 phones = listOf("3153333333"),
                 type = PlaceType.CINE,
-                schedules = listOf()
+                schedules = mapOf(
+                    DayOfWeek.LUNES to "1:00 PM - 10:00 PM",
+                    DayOfWeek.MARTES to "1:00 PM - 10:00 PM",
+                    DayOfWeek.MIERCOLES to "1:00 PM - 10:00 PM",
+                    DayOfWeek.JUEVES to "1:00 PM - 10:00 PM",
+                    DayOfWeek.VIERNES to "1:00 PM - 11:00 PM",
+                    DayOfWeek.SABADO to "11:00 AM - 11:00 PM",
+                    DayOfWeek.DOMINGO to "11:00 AM - 10:00 PM"
+                )
             ),
 
             Place(
@@ -115,7 +153,10 @@ class PlacesViewModel: ViewModel() {
                 images = listOf("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQPdhL0OBim5xj0uppW2fPjRnq4X6WcUc0nOQ&s"),
                 phones = listOf("6015656565"),
                 type = PlaceType.BIBLIOTECA,
-                schedules = listOf()
+                schedules = mapOf(
+                    DayOfWeek.LUNES to "8:00 AM - 8:00 PM",
+                    DayOfWeek.SABADO to "8:00 AM - 6:00 PM"
+                )
             )
         )
     }

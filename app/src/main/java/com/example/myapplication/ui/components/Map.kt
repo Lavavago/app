@@ -4,7 +4,6 @@ import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,12 +35,26 @@ fun Map(
     modifier: Modifier = Modifier,
     places: List<Place> = emptyList(),
     activateClik: Boolean = false,
+    // --- CAMBIO 1: Agregamos initialLocation ---
+    initialLocation: Point? = null,
     onMapClickListener: (Point) -> Unit = {}
 ) {
 
-    var clickedPoint by rememberSaveable { mutableStateOf<Point?>(null) }
+    // --- CAMBIO 2: Inicializamos clickedPoint con initialLocation ---
+    // Usamos remember para mantener el estado de la ubicación seleccionada
+    var clickedPoint by remember { mutableStateOf(initialLocation) }
+
+    // También usamos LaunchedEffect para actualizar clickedPoint si initialLocation cambia
+    // (Esto es útil si el ViewModel carga un lugar existente)
+    LaunchedEffect(initialLocation) {
+        if (initialLocation != clickedPoint) {
+            clickedPoint = initialLocation
+        }
+    }
 
     val context = LocalContext.current
+
+    // ... (El resto de la lógica de permisos, ViewportState y Markers se mantiene) ...
 
     val hasPermission = rememberLocationPermissionState{
         Toast.makeText(
@@ -55,7 +68,7 @@ fun Map(
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
             zoom(7.0)
-            center(Point.fromLngLat(-75.6491181, 4.4687891))
+            center(initialLocation ?: Point.fromLngLat(-75.6491181, 4.4687891)) // Centro inicial o la ubicación pasada
             pitch(45.0)
         }
     }
@@ -70,18 +83,18 @@ fun Map(
         mapViewportState = mapViewportState
     ) {
 
-        // ✔ Listener de clics correcto para Mapbox Compose
+        // Listener de clics
         MapEffect(Unit) { mapView ->
             mapView.gestures.addOnMapClickListener { point ->
                 if (activateClik) {
                     onMapClickListener(point)
-                    clickedPoint = point
+                    clickedPoint = point // Actualiza el marcador visible
                 }
                 true
             }
         }
 
-        // ✔ Seguir al usuario si tiene permisos
+        // Seguir al usuario si tiene permisos
         if (hasPermission) {
             MapEffect(key1 = "follow_puck_location") { mapView ->
                 mapView.location.updateSettings {
@@ -99,14 +112,14 @@ fun Map(
             }
         }
 
-        // ✔ Punto que el usuario selecciona
+        // Punto que el usuario selecciona (usa clickedPoint)
         clickedPoint?.let {
             PointAnnotation(point = it) {
                 iconImage = marker
             }
         }
 
-        // ✔ Mostrar markers de lugares
+        // Mostrar markers de lugares
         if (places.isNotEmpty()) {
             places.forEach { place ->
                 PointAnnotation(

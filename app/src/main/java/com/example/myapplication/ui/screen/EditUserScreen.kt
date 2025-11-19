@@ -30,20 +30,24 @@ import com.example.myapplication.R
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.example.myapplication.model.City // Asegúrate de importar City
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditUserScreen(
+    // Inyección de la instancia del ViewModel.
+    // Asegúrate de que todas tus pantallas (Login, Register, Edit) usen la misma instancia
+    // o un mecanismo de inyección compartido si usas NavHost.
     createUserViewModel: UsersViewModel = viewModel(),
     onBack: () -> Unit
 ) {
-    //  Recolección de estados del ViewModel
-    /*val name by UsersViewModel.name.collectAsState()
+    // 1. RECOLECCIÓN DE ESTADOS DEL VIEWMUDEL: Leemos los datos del usuario activo
+    val name by createUserViewModel.name.collectAsState()
     val username by createUserViewModel.username.collectAsState()
     val email by createUserViewModel.email.collectAsState()
     val city by createUserViewModel.city.collectAsState()
-    val saveResult by createUserViewModel.userSaveResult.collectAsState()
-*/
+    // val saveResult by createUserViewModel.userSaveResult.collectAsState()
+
     var focusedField by remember { mutableStateOf<String?>(null) }
     val primaryColor = MaterialTheme.colorScheme.primary
 
@@ -62,7 +66,6 @@ fun EditUserScreen(
             horizontalArrangement = Arrangement.End
         ) {
             Text(
-                // Usa R.string.back para "Devolver"
                 text = stringResource(R.string.back),
                 fontSize = 16.sp,
                 color = Color.Gray,
@@ -88,11 +91,11 @@ fun EditUserScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-
+            // 2. USO DEL ESTADO 'name' Y FUNCIÓN 'onNameChange'
             FloatingTextField(
-                value = "",//name,
+                value = name, // Muestra el nombre real del usuario
                 onValueChange = {
-                    //createUserViewModel.onNameChange(it)
+                    createUserViewModel.onNameChange(it) // Permite editar el nombre
                     focusedField = "name"
                 },
                 label = stringResource(R.string.profile_full_name),
@@ -102,10 +105,11 @@ fun EditUserScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
 
+            // 3. USO DEL ESTADO 'username' Y FUNCIÓN 'onUsernameChange'
             FloatingTextField(
-                value = "", // username,
+                value = username, // Muestra el username real
                 onValueChange = {
-                   // createUserViewModel.onUsernameChange(it)
+                    createUserViewModel.onUsernameChange(it) // Permite editar el username
                     focusedField = "username"
                 },
                 label = stringResource(R.string.profile_username),
@@ -115,64 +119,50 @@ fun EditUserScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
 
+            // 4. USO DEL ESTADO 'email' (No editable)
             FloatingTextField(
-                value = "", //email,
+                value = email, // Muestra el email real (No se puede editar en este ejemplo)
                 onValueChange = { /* Ignorado, no es editable */ },
-
                 label = "${stringResource(R.string.profile_email)} ${stringResource(R.string.not_editable)}",
-
                 isFocused = focusedField == "email",
                 onFocus = { focusedField = if (it) "email" else null },
-                isEditable = false //
+                isEditable = false // Bloqueado
             )
             Spacer(modifier = Modifier.height(16.dp))
 
 
+            // 5. USO DEL ESTADO 'city' (Muestra el nombre de la ciudad del usuario)
+            // Se usa .name y se reemplazan los guiones bajos por espacios para mejor visualización.
             FloatingTextField(
-                value = "", //city,
-                onValueChange = {
-                    //createUserViewModel.onCityChange(it)
-                    focusedField = "city"
-                },
+                value = city.name.replace("_", " "),
+                onValueChange = { /* Ignorado, se debería usar un Dropdown */ },
                 label = stringResource(R.string.profile_city),
                 isFocused = focusedField == "city",
-                onFocus = { focusedField = if (it) "city" else null }
+                onFocus = { focusedField = if (it) "city" else null },
+                isEditable = false // Se asume que se edita con un Dropdown aparte.
             )
 
             Spacer(modifier = Modifier.height(32.dp))
 
-
-
+            // 6. LLAMADA A LA FUNCIÓN DE GUARDAR
             PurpleButton(
                 onClick = {
-                    //createUserViewModel.updateUser()
-                          },
+                    createUserViewModel.updateUser() // Llama a la lógica de guardado
+                },
                 text = stringResource(R.string.save_changes)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-
-            /*saveResult?.let { result ->
-                Text(
-                    text = when(result) {
-                        UserSaveResult.Success -> stringResource(R.string.user_updated_success)
-                        UserSaveResult.Error -> stringResource(R.string.user_updated_error)
-                    },
-                    color = when(result) {
-                        UserSaveResult.Success -> MaterialTheme.colorScheme.primary
-                        UserSaveResult.Error -> MaterialTheme.colorScheme.error
-                    },
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            /*saveResult?.let { ... } // Lógica de mensaje de guardado (dejada comentada)
 */
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
 
+
+// --- Componentes Reutilizados (No necesitan cambios) ---
 
 @Composable
 fun ProfileIcon(primaryColor: Color) {

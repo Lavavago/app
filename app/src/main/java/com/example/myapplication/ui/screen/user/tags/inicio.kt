@@ -33,11 +33,13 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.example.myapplication.R
+import com.example.myapplication.R // Asegúrate de que R.drawable.cuchara, etc., existen
 import com.example.myapplication.ui.components.Map
 import com.example.myapplication.ui.screen.LocalMainViewModel
 import com.example.myapplication.viewmodel.PlacesViewModel
 import com.example.myapplication.ui.screen.user.nav.RouteTab
+// Importación necesaria para la navegación tipada del detalle:
+import com.example.myapplication.ui.screen.user.nav.RouteTab.PlaceDetail
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapEffect
 import com.mapbox.maps.extension.compose.MapboxMap
@@ -58,6 +60,7 @@ fun inicio(navController: NavController, placesViewModel: PlacesViewModel = view
             placesViewModel = placesViewModel
         )
 
+        // Usamos el mismo ViewModel para obtener la lista de lugares
         val placesViewModel = LocalMainViewModel.current.placesViewModel
         val places by placesViewModel.places.collectAsState()
 
@@ -86,6 +89,9 @@ fun inicio(navController: NavController, placesViewModel: PlacesViewModel = view
     }
 }
 
+// -------------------------------------------------------------------------
+// --- SECCIÓN DE BÚSQUEDA Y FILTROS ---
+// -------------------------------------------------------------------------
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,12 +106,11 @@ fun TopSearchAndFilterSection(
         var query by rememberSaveable { mutableStateOf("") }
         var expanded by rememberSaveable { mutableStateOf(false) }
 
-        // Observamos los lugares quemados desde el ViewModel
         val places by placesViewModel.places.collectAsState()
 
-        // Filtramos los lugares en tiempo real
+        // Filtramos los lugares en tiempo real para las sugerencias
         val filteredPlaces = remember(query, places) {
-            if (query.isBlank()) places
+            if (query.isBlank()) emptyList() // No mostrar sugerencias si la búsqueda está vacía
             else places.filter {
                 it.title.contains(query, ignoreCase = true)
             }
@@ -120,10 +125,11 @@ fun TopSearchAndFilterSection(
                     query = query,
                     onQueryChange = { newQuery ->
                         query = newQuery
-                        expanded = true // muestra sugerencias al escribir
+                        expanded = true
                     },
                     onSearch = {
                         expanded = false
+                        // TODO: Aquí podrías llamar al ViewModel para filtrar el mapa si el usuario presiona buscar
                     },
                     expanded = expanded,
                     onExpandedChange = { expanded = it },
@@ -142,6 +148,7 @@ fun TopSearchAndFilterSection(
                             modifier = Modifier
                                 .padding(start = 8.dp)
                                 .clickable {
+                                    // Navegación a la pantalla de Perfil
                                     navController.navigate(RouteTab.ProfileScreen) {
                                         popUpTo(RouteTab.Inicio) { saveState = true }
                                         launchSingleTop = true
@@ -173,8 +180,13 @@ fun TopSearchAndFilterSection(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
+                                    // 1. Cierra el buscador y establece el texto
                                     query = place.title
                                     expanded = false
+
+                                    // 2. *** CORRECCIÓN APLICADA: NAVEGACIÓN TIPADA ***
+                                    // Esto usa la ruta RouteTab.PlaceDetail(id) que está definida en ContentUser.kt
+                                    navController.navigate(PlaceDetail(place.id))
                                 }
                                 .padding(vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -213,13 +225,15 @@ fun TopSearchAndFilterSection(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // --- Chips de Filtro ---
+        // --- Chips de Filtro (Requiere integración con ViewModel) ---
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            // Actualmente, los chips solo manejan el estado visual.
+            // Para filtrar el mapa, necesitarías un ViewModel que gestione el filtro activo.
             CustomFilterChip(label = "Restaurante", iconRes = R.drawable.cuchara)
             CustomFilterChip(label = "Cafetería", iconRes = R.drawable.cafeteria)
             CustomFilterChip(label = "Museo", iconRes = R.drawable.cuadro)
@@ -230,6 +244,10 @@ fun TopSearchAndFilterSection(
         Spacer(modifier = Modifier.height(16.dp))
     }
 }
+
+// -------------------------------------------------------------------------
+// --- COMPONENTES AUXILIARES ---
+// -------------------------------------------------------------------------
 
 @Composable
 fun CustomFilterChip(label: String, iconRes: Int) {

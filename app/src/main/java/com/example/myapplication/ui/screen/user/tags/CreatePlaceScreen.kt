@@ -1,32 +1,35 @@
 package com.example.myapplication.ui.screen
 
-import androidx.compose.foundation.Image
+import android.app.TimePickerDialog
+import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Create
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.myapplication.R
+import com.example.myapplication.model.DayOfWeek
 import com.example.myapplication.model.PlaceType
 import com.example.myapplication.ui.components.Map
 import com.example.myapplication.viewmodel.CreatePlaceViewModel
 import com.example.myapplication.viewmodel.PlacesViewModel
 import com.example.myapplication.viewmodel.SaveResult
 import com.mapbox.geojson.Point
+import java.util.Calendar
+import java.util.Locale
+import java.text.SimpleDateFormat // Importación necesaria para el formato AM/PM
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,32 +39,68 @@ fun CreatePlaceScreen(
     onClose: () -> Unit = {}
 ) {
 
-    var clickedPoint by rememberSaveable { mutableStateOf<Point?>(null) }
-
+    // --- ESTADO DEL VIEWMODEL ---
     val title by createPlaceViewModel.title.collectAsState()
     val description by createPlaceViewModel.description.collectAsState()
     val address by createPlaceViewModel.address.collectAsState()
     val phone by createPlaceViewModel.phone.collectAsState()
     val photos by createPlaceViewModel.photos.collectAsState()
-    val schedule by createPlaceViewModel.schedule.collectAsState()
+    val schedulesMap by createPlaceViewModel.schedules.collectAsState()
     val selectedType by createPlaceViewModel.type.collectAsState()
     val saveResult by createPlaceViewModel.saveResult.collectAsState()
+    val locationState by createPlaceViewModel.location.collectAsState()
 
+
+    // --- EFECTOS LATERALES ---
+    // 1. Manejo del guardado exitoso
     LaunchedEffect(saveResult) {
         if (saveResult is SaveResult.Success) {
-
-            // Ya está creado, simplemente agréguelo
             val place = createPlaceViewModel.places.value.lastOrNull()
             if (place != null) {
                 placesViewModel.addPlace(place)
             }
 
+            // RESETEAR EL FORMULARIO después de guardar
+            createPlaceViewModel.resetForm()
+
             onClose()
         }
     }
 
+    // 2. Manejo del cierre manual
+    DisposableEffect(Unit) {
+        onDispose {
+            // RESETEAR EL FORMULARIO si el usuario sale manualmente
+            createPlaceViewModel.resetForm()
+        }
+    }
 
-    Scaffold { paddingValues ->
+    // Convertimos Location del ViewModel a Point de Mapbox para el mapa
+    val initialPoint = locationState?.let {
+        Point.fromLngLat(it.longitude, it.latitude)
+    }
+
+    Scaffold(
+        topBar = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Crear Nuevo Lugar",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                IconButton(onClick = onClose) {
+                    Icon(Icons.Filled.Close, contentDescription = "Cerrar")
+                }
+            }
+        }
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -71,57 +110,7 @@ fun CreatePlaceScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
 
-            // Encabezado
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Image(
-                        painter = painterResource(id = R.drawable.gps2),
-                        contentDescription = stringResource(R.string.location_icon_desc),
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(R.string.app_title),
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                IconButton(onClick = onClose) {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.txt_back)
-                    )
-                }
-            }
-
-            // Título
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 24.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.add_place_title),
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Normal,
-                    modifier = Modifier.weight(1f)
-                )
-                Icon(
-                    imageVector = Icons.Filled.Create,
-                    contentDescription = stringResource(R.string.edit_profile),
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
-                )
-            }
-
-            // FORMULARIO
+            // --- FORMULARIO DE ENTRADA DE DATOS ---
             CustomTextField(value = title, onValueChange = createPlaceViewModel::onTitleChange, placeholder = "Nombre del lugar")
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -134,23 +123,18 @@ fun CreatePlaceScreen(
             CustomTextField(value = phone, onValueChange = createPlaceViewModel::onPhoneChange, placeholder = "Teléfono")
             Spacer(modifier = Modifier.height(16.dp))
 
-            ScheduleDropdown(
-                selectedSchedule = schedule,
-                onScheduleSelected = createPlaceViewModel::onScheduleChange
+            //  EDITOR DE HORARIOS INTERACTIVO
+            DailyScheduleEditor(
+                currentSchedules = schedulesMap,
+                onScheduleChange = createPlaceViewModel::onDayScheduleChange
             )
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            CustomTextField(value = photos, onValueChange = createPlaceViewModel::onPhotosChange, placeholder = "URL de foto")
+            CustomTextField(value = photos, onValueChange = createPlaceViewModel::onPhotosChange, placeholder = "URL de foto ")
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "Tipo de lugar",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
+            // SELECTOR DE TIPO (CORREGIDO para UI/UX uniforme)
             PlaceTypeSelector(
                 selectedType = selectedType,
                 onTypeSelected = { createPlaceViewModel.onTypeChange(it) }
@@ -158,85 +142,207 @@ fun CreatePlaceScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // ============================
-            //        MAPA
-            // ============================
+            // 🗺️ MAPA para SELECCIONAR UBICACIÓN
             Text(
-                text = "Ubicación",
-                fontSize = 18.sp,
+                text = "Selecciona la ubicación en el mapa (Requerido)",
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp)
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
             )
 
-            Card(
+            Map(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(260.dp),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(4.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .pointerInput(Unit) {}
-                ) {
-                    Map(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(6.dp),
-                        activateClik = true,
-                        onMapClickListener = { point ->
-                            clickedPoint = point
-                            createPlaceViewModel.onLocationChange(point.latitude(), point.longitude())
-                        }
-                    )
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                activateClik = true,
+                initialLocation = initialPoint,
+                onMapClickListener = { point ->
+                    createPlaceViewModel.onLocationChange(point.latitude(), point.longitude())
                 }
-            }
+            )
 
-            Spacer(modifier = Modifier.height(25.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-            // BOTÓN GUARDAR
+            // --- BOTÓN GUARDAR ---
             Button(
                 onClick = { createPlaceViewModel.savePlace() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .padding(horizontal = 40.dp),
-                shape = RoundedCornerShape(25.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
+                Text("Guardar Lugar", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+            }
+
+            // Manejo de error visual
+            if (saveResult is SaveResult.Error) {
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Guardar lugar",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold
+                    text = "Error: Por favor, rellena todos los campos requeridos (Nombre, Descripción, Dirección y Ubicación en el mapa).",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(horizontal = 8.dp)
                 )
             }
 
-            if (saveResult != null) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = when (saveResult) {
-                        is SaveResult.Success -> "Lugar guardado correctamente"
-                        is SaveResult.Error -> "Por favor, completa todos los campos y selecciona la ubicación"
-                        else -> ""
-                    },
-                    color = if (saveResult is SaveResult.Success)
-                        MaterialTheme.colorScheme.primary
-                    else
-                        MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(bottom = 20.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
+
+
+// ----------------------------------------------------------------------------------
+// --- COMPONENTES AUXILIARES DE HORARIOS INTERACTIVOS ---
+// ----------------------------------------------------------------------------------
+
+// COMPONENTE PRINCIPAL DE HORARIOS
+@Composable
+fun DailyScheduleEditor(
+    currentSchedules: Map<DayOfWeek, String>,
+    onScheduleChange: (DayOfWeek, String) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp)
+    ) {
+        Text(
+            text = "Configuración de Horarios (Toque el día para seleccionar la hora)",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        DayOfWeek.values().forEach { day ->
+            ScheduleDayRow(
+                day = day,
+                initialSchedule = currentSchedules[day] ?: "",
+                onScheduleChange = onScheduleChange
+            )
+        }
+    }
+}
+
+// COMPONENTE AUXILIAR DE FILA (Tarjeta desplegable con TimePicker)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ScheduleDayRow(
+    day: DayOfWeek,
+    initialSchedule: String,
+    onScheduleChange: (DayOfWeek, String) -> Unit
+) {
+    val context = LocalContext.current
+    var scheduleText by rememberSaveable(key = day.name) { mutableStateOf(initialSchedule) }
+
+    val displayText = when {
+        scheduleText.equals("cerrado", true) -> "Cerrado"
+        scheduleText.isBlank() -> "Sin horario / Cerrado"
+        else -> scheduleText
+    }
+
+    LaunchedEffect(initialSchedule) {
+        scheduleText = initialSchedule
+    }
+
+    // --- Lógica de TimePicker (AM/PM) ---
+    val showStartTimePicker = {
+        TimePickerDialog(
+            context,
+            { _, hourOfDay: Int, minute: Int ->
+                val startHourFormatted = formatTimeForDisplay(hourOfDay, minute)
+                showEndTimePicker(context, startHourFormatted, day, onScheduleChange)
+            }, Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
+            Calendar.getInstance().get(Calendar.MINUTE),
+            false // Formato 12 horas (AM/PM)
+        ).show()
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        onClick = showStartTimePicker,
+        colors = CardDefaults.cardColors(
+            containerColor = if (scheduleText.isNotBlank() && !scheduleText.equals("cerrado", true)) Color(0xFFF0E6FF) else MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(1.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = day.name.lowercase().replaceFirstChar { it.uppercase() },
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = displayText,
+                    color = when {
+                        scheduleText.equals("cerrado", true) -> MaterialTheme.colorScheme.error
+                        scheduleText.isNotBlank() -> MaterialTheme.colorScheme.primary
+                        else -> Color.Gray
+                    }
+                )
+            }
+
+            // Botones para acción rápida
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                // Opción para seleccionar directamente "Cerrado"
+                TextButton(onClick = {
+                    val closed = "Cerrado"
+                    scheduleText = closed
+                    onScheduleChange(day, closed)
+                }) {
+                    Text("Cerrado", color = MaterialTheme.colorScheme.error)
+                }
+
+                // Opción para abrir el selector
+                TextButton(onClick = showStartTimePicker) {
+                    Text("Seleccionar Horas")
+                }
+            }
+        }
+    }
+}
+
+// Función auxiliar para formatear hora y minuto en formato AM/PM (Ej: "09:30 AM")
+private fun formatTimeForDisplay(hourOfDay: Int, minute: Int): String {
+    val calendar = Calendar.getInstance()
+    calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+    calendar.set(Calendar.MINUTE, minute)
+
+    val formatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
+    return formatter.format(calendar.time)
+}
+
+// Función auxiliar para mostrar el selector de hora de fin (AM/PM)
+private fun showEndTimePicker(
+    context: Context,
+    startHourFormatted: String,
+    day: DayOfWeek,
+    onScheduleChange: (DayOfWeek, String) -> Unit
+) {
+    TimePickerDialog(
+        context,
+        { _, endHour: Int, endMinute: Int ->
+            val endHourFormatted = formatTimeForDisplay(endHour, endMinute)
+            val finalSchedule = "$startHourFormatted - $endHourFormatted"
+            onScheduleChange(day, finalSchedule)
+        }, Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
+        Calendar.getInstance().get(Calendar.MINUTE),
+        false // Formato 12 horas (AM/PM)
+    ).show()
+}
+
+
+// ----------------------------------------------------------------------------------
+// --- OTRAS FUNCIONES AUXILIARES (MODIFICADAS) ---
+// ----------------------------------------------------------------------------------
 
 @Composable
 fun CustomTextField(
@@ -256,65 +362,45 @@ fun CustomTextField(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScheduleDropdown(
-    selectedSchedule: String,
-    onScheduleSelected: (String) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    val scheduleOptions = listOf(
-        "Lunes - Viernes 8:00 AM - 8:00 PM",
-        "Sábados - Domingos - Festivos 9:00 AM - 6:00 PM",
-        "Abierto 24 horas",
-        "Solo fines de semana"
-    )
-
-    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
-        TextField(
-            value = selectedSchedule,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Selecciona un horario") },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth()
-        )
-
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            scheduleOptions.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(option) },
-                    onClick = {
-                        onScheduleSelected(option)
-                        expanded = false
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
 fun PlaceTypeSelector(
     selectedType: PlaceType,
     onTypeSelected: (PlaceType) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    Box {
-        Button(onClick = { expanded = !expanded }) {
-            Text(text = selectedType.name)
-        }
+    // Usamos ExposedDropdownMenuBox para simular el look de OutlinedTextField
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = Modifier.fillMaxWidth().padding(top = 8.dp) // Añadimos padding superior para el espacio
+    ) {
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(), // Esencial para el dropdown
+            readOnly = true,
+            value = selectedType.name,
+            onValueChange = { /* Solo lectura */ },
+            label = { Text("Tipo de lugar") }, // Label que reemplaza el texto anterior
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            shape = RoundedCornerShape(10.dp),
+            colors = OutlinedTextFieldDefaults.colors()
+        )
 
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
             PlaceType.values().forEach { type ->
                 DropdownMenuItem(
                     text = { Text(type.name) },
                     onClick = {
                         onTypeSelected(type)
                         expanded = false
-                    }
+                    },
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
                 )
             }
         }

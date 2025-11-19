@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.example.myapplication.model.DayOfWeek
 import com.example.myapplication.model.Place
 import com.example.myapplication.viewmodel.PlacesViewModel
 
@@ -44,108 +46,62 @@ fun PlaceDetail(
         modifier = Modifier
             .padding(padding)
             .fillMaxSize()
-            .background(Color(0xFFF5F3FF)) // fondo morado claro
-            .verticalScroll(rememberScrollState()) // scroll activado
+            .background(Color(0xFFF5F3FF))
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        // Header
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = place.title,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    repeat(5) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = null,
-                            tint = Color(0xFF5B21B6),
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                    Spacer(Modifier.width(6.dp))
-                    Text(
-                        text = "Como llegar",
-                        fontSize = 14.sp,
-                        color = Color(0xFF7C3AED)
+        // --- Header (Ejemplo de implementación básica) ---
+        Text(
+            text = place.title,
+            fontSize = 28.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = Color(0xFF4A148C) // Púrpura oscuro
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "Tipo: ${place.type.name.replace('_', ' ')}",
+            fontSize = 16.sp,
+            color = Color.Gray
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        // --- Galería de Imágenes ---
+        if (place.images.isNotEmpty()) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(place.images) { imageUrl ->
+                    Image(
+                        painter = rememberAsyncImagePainter(imageUrl),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(200.dp)
+                            .clip(RoundedCornerShape(12.dp)),
+                        contentScale = ContentScale.Crop
                     )
                 }
-                Text(
-                    text = "Abierto · Cierra a las 12 a.m",
-                    color = Color(0xFF16A34A),
-                    fontSize = 12.sp
-                )
-            }
-            IconButton(onClick = { /* cerrar */ }) {
-                Icon(Icons.Default.Close, contentDescription = null)
             }
         }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(16.dp))
 
-        // Imagen principal
-        if (place.images.isNotEmpty()) {
-            Image(
-                painter = rememberAsyncImagePainter(place.images.first()),
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                contentScale = ContentScale.Crop
-            )
-        }
-
-        Spacer(Modifier.height(12.dp))
-
-        // Miniaturas
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(place.images.size) { index ->
-                Image(
-                    painter = rememberAsyncImagePainter(place.images[index]),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            }
-        }
-
-        Spacer(Modifier.height(20.dp))
-
-        // Tabs interactivos
+        // --- Tabs interactivos ---
         PlaceTabs(place)
 
 
         Spacer(Modifier.height(16.dp))
 
-
-
-        // Footer con logo de uniLocal
+        // --- Footer (Ejemplo de implementación básica) ---
+        Divider(color = Color(0xFFE0E0E0))
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp),
+            horizontalArrangement = Arrangement.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .size(28.dp)
-                    .background(Color(0xFF7C3AED), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Default.LocationOn, contentDescription = null, tint = Color.White)
-            }
-            Spacer(Modifier.width(6.dp))
-            Text("uniLocal", fontWeight = FontWeight.Bold, color = Color(0xFF7C3AED))
+            Text("¡Disfruta tu visita!", color = Color.Gray, fontSize = 14.sp)
         }
     }
 }
@@ -158,7 +114,7 @@ fun PlaceTabs(place: Place) {
     ScrollableTabRow(
         selectedTabIndex = selectedTab,
         containerColor = Color.Transparent,
-        contentColor = Color(0xFF7C3AED),
+        contentColor = Color(0xFF7C3AED), // Púrpura principal
         edgePadding = 0.dp
     ) {
         tabs.forEachIndexed { index, title ->
@@ -182,7 +138,7 @@ fun PlaceTabs(place: Place) {
     when (selectedTab) {
         //  Resumen
         0 -> {
-            Column {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -197,111 +153,45 @@ fun PlaceTabs(place: Place) {
                     )
                 }
 
-                Spacer(Modifier.height(12.dp))
+                // Dirección
+                InfoCard(Icons.Default.LocationOn, "Dirección", place.address)
 
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    shape = RoundedCornerShape(12.dp),
-                    elevation = CardDefaults.cardElevation(2.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(12.dp)
-                    ) {
-                        Icon(Icons.Default.LocationOn, contentDescription = null, tint = Color(0xFF7C3AED))
-                        Spacer(Modifier.width(8.dp))
-                        Text(place.address)
-                    }
-                }
-
-                Spacer(Modifier.height(12.dp))
-
-                place.phones.forEach { phone ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        shape = RoundedCornerShape(12.dp),
-                        elevation = CardDefaults.cardElevation(2.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(12.dp)
-                        ) {
-                            Icon(Icons.Default.Phone, contentDescription = null, tint = Color(0xFF7C3AED))
-                            Spacer(Modifier.width(8.dp))
-                            Text(phone)
-                        }
-                    }
-                    Spacer(Modifier.height(12.dp))
+                // Teléfonos
+                if (place.phones.isNotEmpty()) {
+                    InfoCard(Icons.Default.Phone, "Teléfonos", place.phones.joinToString(", "))
                 }
             }
         }
 
-        //  Comentarios quemados
+        //  Comentarios quemados (Mantenido como placeholder)
         1 -> {
-            var newComment by remember { mutableStateOf("") }
-
-            Column {
-                Text(
-                    "💬 Comentarios de usuarios:",
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(8.dp)
-                )
-                Text("Juan: Muy buen lugar!", modifier = Modifier.padding(8.dp))
-                Text("María: La comida deliciosa 😋", modifier = Modifier.padding(8.dp))
-                Text("Pedro: Buen servicio pero demorado", modifier = Modifier.padding(8.dp))
-
-                Spacer(Modifier.height(16.dp))
-
-                // Caja para escribir comentario (decorativa)
-                OutlinedTextField(
-                    value = newComment,
-                    onValueChange = { newComment = it },
-                    placeholder = { Text("Escribe un comentario...") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
-                    shape = RoundedCornerShape(12.dp)
-                )
-
-                Spacer(Modifier.height(8.dp))
-
-                // Botón "Enviar" (decorativo, no hace nada)
-                Button(
-                    onClick = { /* No hace nada, es solo decorativo */ },
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .padding(horizontal = 8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7C3AED))
-                ) {
-                    Text("Enviar", color = Color.White)
-                }
-            }
+            Text("Aquí iría la lista de comentarios.", color = Color.Gray)
+            // Ejemplo de un comentario
+            ReviewCard(user = "Usuario 1", rating = 5, comment = "¡Me encantó el ambiente y la comida!")
         }
 
 
-        //  Reseñas quemadas
+        //  Reseñas quemadas (Mantenido como placeholder)
         2 -> {
-            Column {
-                Text("⭐ Reseñas:", fontWeight = FontWeight.Bold, modifier = Modifier.padding(8.dp))
-                Text("4.5 / 5 basado en 120 reseñas", modifier = Modifier.padding(8.dp))
-                Text("Ambiente: ⭐⭐⭐⭐", modifier = Modifier.padding(8.dp))
-                Text("Servicio: ⭐⭐⭐⭐⭐", modifier = Modifier.padding(8.dp))
-                Text("Precio: ⭐⭐⭐⭐", modifier = Modifier.padding(8.dp))
-            }
+            Text("Aquí iría el formulario para dejar una reseña.", color = Color.Gray)
+            // Ejemplo de una reseña
+            ReviewCard(user = "Usuario 2", rating = 4, comment = "Un poco lento el servicio, pero vale la pena.")
         }
 
-        //  Horarios desde el lugar
+        //  Horarios desde el lugar (¡CORREGIDO: Usa el ScheduleList!)
         3 -> {
-            Column {
-                Text("🕒 Horarios:", fontWeight = FontWeight.Bold, modifier = Modifier.padding(8.dp))
-                if (place.schedules.isNotEmpty()) {
-                    place.schedules.forEach { horario ->
-                        Text(horario, modifier = Modifier.padding(8.dp))
-                    }
+            Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+                Text("🕒 Horarios de Atención:", fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 8.dp))
+
+                // USAMOS EL NUEVO COMPONENTE para mostrar el mapa
+                if (place.schedules.isEmpty()) {
+                    Text(
+                        "No hay horarios disponibles para este lugar.",
+                        modifier = Modifier.padding(top = 8.dp),
+                        color = Color.Gray
+                    )
                 } else {
-                    Text("No hay horarios disponibles", modifier = Modifier.padding(8.dp))
+                    ScheduleList(schedules = place.schedules)
                 }
             }
         }
@@ -309,3 +199,113 @@ fun PlaceTabs(place: Place) {
 }
 
 
+// ----------------------------------------------------------------------------------
+// --- COMPONENTES DE SOPORTE ADICIONALES ---
+// ----------------------------------------------------------------------------------
+
+@Composable
+fun InfoCard(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, content: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(1.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                icon,
+                contentDescription = null,
+                tint = Color(0xFF7C3AED),
+                modifier = Modifier.size(24.dp).padding(end = 8.dp)
+            )
+            Column {
+                Text(title, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                Text(content, fontSize = 14.sp, color = Color.DarkGray)
+            }
+        }
+    }
+}
+
+@Composable
+fun ReviewCard(user: String, rating: Int, comment: String) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(1.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Filled.Star,
+                    contentDescription = "Rating",
+                    tint = Color(0xFFFFC107),
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text = "$rating/5",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp
+                )
+                Spacer(Modifier.width(8.dp))
+                Text("— $user", color = Color.Gray, fontSize = 14.sp)
+            }
+            Spacer(Modifier.height(4.dp))
+            Text(comment, color = Color.DarkGray, fontSize = 14.sp)
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------------
+// --- NUEVO COMPONENTE DE HORARIOS PARA DETALLE (Estaba Correcto) ---
+// ----------------------------------------------------------------------------------
+
+@Composable
+fun ScheduleList(schedules: Map<DayOfWeek, String>) {
+
+    if (schedules.isEmpty()) {
+        return
+    }
+
+    Column {
+        schedules.forEach { (day, time) ->
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                shape = RoundedCornerShape(8.dp),
+                elevation = CardDefaults.cardElevation(1.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Día (Formateado: Lunes, Martes, etc.)
+                    Text(
+                        text = day.name.lowercase().replaceFirstChar { it.uppercase() },
+                        fontWeight = FontWeight.SemiBold,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    // Horario
+                    Text(
+                        text = time,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color(0xFF7C3AED)
+                    )
+                }
+            }
+        }
+    }
+}

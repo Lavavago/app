@@ -11,5 +11,5 @@ data class Place (
     val images: List<String>,
     val phones: List<String>,
     val type: PlaceType,
-    val schedules: List<String>,
+    val schedules: Map<DayOfWeek, String>,
 )
