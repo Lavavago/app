@@ -1,10 +1,10 @@
-// ui/screen/user/nav/ContentUser.kt
 package com.example.myapplication.ui.screen.user.nav
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -26,9 +26,9 @@ fun ContentUser(
     onLogout: () -> Unit,
     onEditProfile: () -> Unit
 ) {
-    // Creamos los ViewModels una sola vez para que se compartan entre pantallas
     val placesViewModel: PlacesViewModel = viewModel()
     val createPlaceViewModel: CreatePlaceViewModel = viewModel()
+    val context = LocalContext.current
 
     NavHost(
         modifier = Modifier.padding(padding),
@@ -36,14 +36,13 @@ fun ContentUser(
         startDestination = RouteTab.Inicio
     ) {
         composable<RouteTab.Inicio> {
-            inicio(navController = navController)
+            inicio(navController)
         }
 
         composable<RouteTab.ExploreScreen> {
             ExploreScreen()
         }
 
-        // Pantalla principal de lugares (favoritos + creados)
         composable<RouteTab.SafeScreen> {
             SafeScreen(
                 padding = padding,
@@ -58,13 +57,14 @@ fun ContentUser(
             )
         }
 
-
-        // Pantalla para crear un nuevo lugar
         composable<RouteTab.CreatePlaceScreen> {
             CreatePlaceScreen(
                 createPlaceViewModel = createPlaceViewModel,
                 placesViewModel = placesViewModel,
-                onClose = { navController.popBackStack() } // vuelve atrás al guardar
+                onClose = { navController.popBackStack() },
+                onImageSelected = { url ->
+                    createPlaceViewModel.onPhotosChange(url)
+                }
             )
         }
 
@@ -75,7 +75,6 @@ fun ContentUser(
             )
         }
 
-        // Pantalla de detalle de un lugar
         composable<RouteTab.PlaceDetail> {
             val args = it.toRoute<RouteTab.PlaceDetail>()
             PlaceDetail(

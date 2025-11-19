@@ -1,7 +1,14 @@
 package com.example.myapplication.ui.screen
 
+import android.Manifest
 import android.app.TimePickerDialog
 import android.content.Context
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,7 +26,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import com.cloudinary.Cloudinary
+import com.cloudinary.utils.ObjectUtils
 import com.example.myapplication.model.DayOfWeek
 import com.example.myapplication.model.PlaceType
 import com.example.myapplication.ui.components.Map
@@ -27,6 +38,8 @@ import com.example.myapplication.viewmodel.CreatePlaceViewModel
 import com.example.myapplication.viewmodel.PlacesViewModel
 import com.example.myapplication.viewmodel.SaveResult
 import com.mapbox.geojson.Point
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Locale
 import java.text.SimpleDateFormat // Importación necesaria para el formato AM/PM
@@ -36,8 +49,11 @@ import java.text.SimpleDateFormat // Importación necesaria para el formato AM/P
 fun CreatePlaceScreen(
     createPlaceViewModel: CreatePlaceViewModel = viewModel(),
     placesViewModel: PlacesViewModel,
-    onClose: () -> Unit = {}
+    onClose: () -> Unit = {},
+    onImageSelected: (String) -> Unit
 ) {
+
+    val context = LocalContext.current
 
     // --- ESTADO DEL VIEWMODEL ---
     val title by createPlaceViewModel.title.collectAsState()
@@ -49,6 +65,49 @@ fun CreatePlaceScreen(
     val selectedType by createPlaceViewModel.type.collectAsState()
     val saveResult by createPlaceViewModel.saveResult.collectAsState()
     val locationState by createPlaceViewModel.location.collectAsState()
+
+
+    var image by remember { mutableStateOf("")}
+
+    val config = mapOf(
+        "cloud_name" to "dxki0nzyu",
+        "api_key" to "289513331981943",
+        "api_secret" to "ojMlfLv7mkWs17-5V1-Yix_enoA"
+    )
+
+    val scope = rememberCoroutineScope()
+    val cloudinary = Cloudinary(config)
+
+    val fileLaucher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+    ){ uri: Uri? ->
+        uri?.let {
+            scope.launch(Dispatchers.IO) {
+                val inputStream = context.contentResolver.openInputStream(it)
+                inputStream?.use { stream ->
+                    val result = cloudinary.uploader().upload(stream, ObjectUtils.emptyMap())
+                    val imageUrl = result["secure_url"].toString()
+                    image = imageUrl
+                    onImageSelected(imageUrl)
+                }
+            }
+        }
+
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) {
+        if(it) {
+            Toast.makeText(context, "Permiso concedido", Toast.LENGTH_SHORT).show()
+
+        }else{
+            Toast.makeText(context, "Permiso denegado", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
+
 
 
     // --- EFECTOS LATERALES ---
@@ -131,7 +190,38 @@ fun CreatePlaceScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            CustomTextField(value = photos, onValueChange = createPlaceViewModel::onPhotosChange, placeholder = "URL de foto ")
+            // CustomTextField(value = photos, onValueChange = createPlaceViewModel::onPhotosChange, placeholder = "URL de foto ")
+            Button(
+                onClick = {
+                    val permissonCheckResult = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        ContextCompat.checkSelfPermission(context, Manifest.permission.READ_MEDIA_IMAGES)
+                    } else {
+                        ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
+                    }
+
+                    if(permissonCheckResult == PackageManager.PERMISSION_GRANTED){
+                        fileLaucher.launch("image/*")
+                    }else{
+                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+                            permissionLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES)
+                        }else{
+                            permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+                        }
+                    }
+                }
+            ){
+                Text(
+                    text = "Seleccionar foto"
+                )
+            }
+
+            AsyncImage(
+                modifier = Modifier.width(200.dp),
+                model = image,
+                contentDescription = null
+            )
+
+
             Spacer(modifier = Modifier.height(16.dp))
 
             // SELECTOR DE TIPO (CORREGIDO para UI/UX uniforme)
