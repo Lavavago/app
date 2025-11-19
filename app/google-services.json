@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "867045473568",
+    "project_id": "mapas-2025-2",
+    "storage_bucket": "mapas-2025-2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:867045473568:android:0e3ccb18872cd46612eb45",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtp2f7rj8CSULljG5ZIUR9_AwO4L_yTvk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

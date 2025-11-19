@@ -1,12 +1,18 @@
 package com.example.myapplication.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.myapplication.model.City
 import com.example.myapplication.model.Role
 import com.example.myapplication.model.User
+import com.example.myapplication.utils.RequestResult
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class UsersViewModel: ViewModel(){
 
@@ -36,7 +42,9 @@ class UsersViewModel: ViewModel(){
     private var editingUserId: String? = null
     private var editingUserRole: Role? = null
 
-
+    private val _userResult = MutableStateFlow<RequestResult?>(null)
+    val userResult: StateFlow<RequestResult?> = _userResult.asStateFlow()
+    val db = Firebase.firestore
     init {
         loadUsers()
         // --- CORRECCIÓN 2: Se elimina la llamada a loadCurrentUser() ---
@@ -123,56 +131,24 @@ class UsersViewModel: ViewModel(){
 
     // --- FUNCIONES DE MANEJO DE LISTA ORIGINALES ---
 
-    fun loadUsers(){
-
-        _users.value = listOf(
-            User(
-                id = "1", // Admin
-                name = "Admin",
-                username = "admin",
-                role = Role.ADMIN,
-                city = City.BOGOTA,
-                email = "admin@example.com",
-                password = "admin"
-            ),
-            User(
-                id = "2", // Juan Pérez
-                name = "Juan Pérez",
-                username = "juanp",
-                role = Role.USER,
-                city = City.ARMENIA,
-                email = "juanp@example.com",
-                password = "pass123"
-            ),
-            User(
-                id = "3",
-                name = "María Gómez",
-                username = "mariag",
-                role = Role.USER,
-                city = City.PEREIRA,
-                email = "mariag@example.com",
-                password = "pass456"
-            )
-        )
-
-    }
 
     /**
      * Crea un nuevo usuario y, crucialmente, lo establece como el usuario actual.
      */
+
     fun create(user: User){
-        // Generar un ID simple, ya que los IDs no son generados por una DB real aquí
-        val nextId = (_users.value.mapNotNull { it.id.toIntOrNull() }.maxOrNull() ?: 0) + 1
-        val newUserWithId = user.copy(id = nextId.toString())
+        viewModelScope.launch {
+            _userResult.value = RequestResult.Loading
+            _userResult.value = runCatching { createFirebase(user) }
+                .fold(
+                    onSuccess = { RequestResult.Success("Usuario creado correctamente")},
+                    onFailure = { RequestResult.Failure(it.message ?: "Usuario creando el Negocio")},
+                )
+        }
+    }
+    private suspend fun createFirebase(user: User){
+        db.collection("users").add(user).await()
 
-        // 1. Añadir el nuevo usuario a la lista
-        _users.value = _users.value + newUserWithId
-
-        // 2. *** CAMBIO CLAVE: Establecer el nuevo usuario como el usuario actual. ***
-        setCurrentUser(newUserWithId.id)
-
-        // El setCurrentUser() llama a loadCurrentUser(), por lo que los campos de edición
-        // ahora reflejarán los datos de este nuevo usuario inmediatamente.
     }
 
     fun findById(id: String): User?{
@@ -184,11 +160,48 @@ class UsersViewModel: ViewModel(){
     }
 
     fun login(username: String, password: String): User?{
-        val loggedInUser = _users.value.find { it.username == username && it.password == password }
+       /* val loggedInUser = _users.value.find { it.username == username && it.password == password }
         // Si el login es exitoso, establecemos la sesión
         loggedInUser?.let {
             setCurrentUser(it.id)
-        }
-        return loggedInUser
+        }*/
+        return _users.value.find { it.username == username && it.password == password }
+    }
+
+    fun resetOperationResult(){
+        _userResult.value = null
+    }
+    fun loadUsers(){
+
+        /*    _users.value = listOf(
+                User(
+                    id = "1", // Admin
+                    name = "Admin",
+                    username = "admin",
+                    role = Role.ADMIN,
+                    city = City.BOGOTA,
+                    email = "admin@example.com",
+                    password = "admin"
+                ),
+                User(
+                    id = "2", // Juan Pérez
+                    name = "Juan Pérez",
+                    username = "juanp",
+                    role = Role.USER,
+                    city = City.ARMENIA,
+                    email = "juanp@example.com",
+                    password = "pass123"
+                ),
+                User(
+                    id = "3",
+                    name = "María Gómez",
+                    username = "mariag",
+                    role = Role.USER,
+                    city = City.PEREIRA,
+                    email = "mariag@example.com",
+                    password = "pass456"
+                )
+            )
+        */
     }
 }
