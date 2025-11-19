@@ -1,16 +1,7 @@
 package com.example.myapplication.ui.screen.user.tags
 
-import android.content.pm.PackageManager
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
@@ -29,166 +20,95 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.example.myapplication.R // Asegúrate de que R.drawable.cuchara, etc., existen
+import com.example.myapplication.R
+import com.example.myapplication.model.PlaceType
+import com.example.myapplication.ui.components.FilterChipItem
 import com.example.myapplication.ui.components.Map
 import com.example.myapplication.ui.screen.LocalMainViewModel
-import com.example.myapplication.viewmodel.PlacesViewModel
 import com.example.myapplication.ui.screen.user.nav.RouteTab
-// Importación necesaria para la navegación tipada del detalle:
-import com.example.myapplication.ui.screen.user.nav.RouteTab.PlaceDetail
-import com.mapbox.geojson.Point
-import com.mapbox.maps.extension.compose.MapEffect
-import com.mapbox.maps.extension.compose.MapboxMap
-import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
-import com.mapbox.maps.extension.compose.annotation.rememberIconImage
-import com.mapbox.maps.plugin.PuckBearing
-import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
-import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.maps.plugin.viewport.data.DefaultViewportTransitionOptions
-
-@Composable
-fun inicio(navController: NavController, placesViewModel: PlacesViewModel = viewModel()) {
-    Column(modifier = Modifier.fillMaxSize()) {
-
-        TopSearchAndFilterSection(
-            modifier = Modifier.fillMaxWidth(),
-            navController = navController,
-            placesViewModel = placesViewModel
-        )
-
-        // Usamos el mismo ViewModel para obtener la lista de lugares
-        val placesViewModel = LocalMainViewModel.current.placesViewModel
-        val places by placesViewModel.places.collectAsState()
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .background(Color(0xFFE0E0E0), RoundedCornerShape(16.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-
-            Map (
-                places = places,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-        }
-
-        Text(
-            text = "Armenia / Quindío",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(24.dp)
-        )
-    }
-}
-
-// -------------------------------------------------------------------------
-// --- SECCIÓN DE BÚSQUEDA Y FILTROS ---
-// -------------------------------------------------------------------------
-
+import com.example.myapplication.viewmodel.PlacesViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopSearchAndFilterSection(
-    modifier: Modifier = Modifier,
-    navController: NavController,
-    placesViewModel: PlacesViewModel
-) {
-    Column(
-        modifier = modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)
-    ) {
-        var query by rememberSaveable { mutableStateOf("") }
-        var expanded by rememberSaveable { mutableStateOf(false) }
+fun inicio(navController: NavController, placesViewModel: PlacesViewModel = viewModel()) {
 
-        val places by placesViewModel.places.collectAsState()
+    val placesViewModel = LocalMainViewModel.current.placesViewModel
+    val places by placesViewModel.places.collectAsState()
 
-        // Filtramos los lugares en tiempo real para las sugerencias
-        val filteredPlaces = remember(query, places) {
-            if (query.isBlank()) emptyList() // No mostrar sugerencias si la búsqueda está vacía
-            else places.filter {
-                it.title.contains(query, ignoreCase = true)
-            }
-        }
+    // Estados de búsqueda y filtros
+    var query by rememberSaveable { mutableStateOf("") }
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    var selectedFilters by remember { mutableStateOf<List<PlaceType>>(emptyList()) }
 
+    // --- Filtro por búsqueda ---
+    val filteredBySearch = remember(query, places) {
+        if (query.isBlank()) places
+        else places.filter { it.title.contains(query, ignoreCase = true) }
+    }
+
+    // --- Filtro por tipos ---
+    val filteredByType = remember(selectedFilters, filteredBySearch) {
+        if (selectedFilters.isEmpty()) filteredBySearch
+        else filteredBySearch.filter { selectedFilters.contains(it.type) }
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+
+        // --- Barra de Búsqueda + Perfil ---
+        // --- Barra de Búsqueda + Perfil ---
         SearchBar(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            inputField = {
-                SearchBarDefaults.InputField(
-                    query = query,
-                    onQueryChange = { newQuery ->
-                        query = newQuery
-                        expanded = true
-                    },
-                    onSearch = {
-                        expanded = false
-                        // TODO: Aquí podrías llamar al ViewModel para filtrar el mapa si el usuario presiona buscar
-                    },
-                    expanded = expanded,
-                    onExpandedChange = { expanded = it },
-                    placeholder = { Text(text = "Buscar aquí") },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Buscar",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    },
-                    trailingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Perfil",
-                            modifier = Modifier
-                                .padding(start = 8.dp)
-                                .clickable {
-                                    // Navegación a la pantalla de Perfil
-                                    navController.navigate(RouteTab.ProfileScreen) {
-                                        popUpTo(RouteTab.Inicio) { saveState = true }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
-                                }
-                        )
+            query = query,
+            onQueryChange = {
+                query = it
+                expanded = true
+            },
+            onSearch = {
+                expanded = false
+            },
+            active = expanded,
+            onActiveChange = { expanded = it },
+            leadingIcon = {
+                Icon(
+                    Icons.Default.Search,
+                    contentDescription = "Buscar",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+            trailingIcon = {
+                Icon(
+                    Icons.Default.Person,
+                    contentDescription = "Perfil",
+                    modifier = Modifier.clickable {
+                        navController.navigate(RouteTab.ProfileScreen)
                     }
                 )
             },
-            expanded = expanded,
-            onExpandedChange = { expanded = it }
+            placeholder = { Text("Buscar aquí") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
         ) {
-            // Sugerencias filtradas en tiempo real
+
+            // --- SUGERENCIAS ---
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                if (filteredPlaces.isEmpty()) {
-                    Text(
-                        text = "No se encontraron lugares",
-                        color = Color.Gray,
-                        fontSize = 14.sp
-                    )
+                if (filteredBySearch.isEmpty()) {
+                    Text("No se encontraron lugares", color = Color.Gray)
                 } else {
-                    filteredPlaces.forEach { place ->
+                    filteredBySearch.forEach { place ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    // 1. Cierra el buscador y establece el texto
                                     query = place.title
                                     expanded = false
-
-                                    // 2. *** CORRECCIÓN APLICADA: NAVEGACIÓN TIPADA ***
-                                    // Esto usa la ruta RouteTab.PlaceDetail(id) que está definida en ContentUser.kt
-                                    navController.navigate(PlaceDetail(place.id))
                                 }
-                                .padding(vertical = 6.dp),
+                                .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Image(
@@ -199,88 +119,88 @@ fun TopSearchAndFilterSection(
                                     .clip(RoundedCornerShape(10.dp)),
                                 contentScale = ContentScale.Crop
                             )
-
-                            Spacer(modifier = Modifier.width(10.dp))
-
+                            Spacer(Modifier.width(10.dp))
                             Column {
+                                Text(place.title, fontWeight = FontWeight.Bold)
                                 Text(
-                                    text = place.title,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 15.sp,
-                                    color = Color.Black
-                                )
-                                Text(
-                                    text = place.description,
+                                    place.description,
                                     fontSize = 13.sp,
                                     color = Color.Gray,
                                     maxLines = 1
                                 )
                             }
                         }
-                        Divider(color = Color.LightGray, thickness = 0.5.dp)
+                        Divider()
                     }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
 
-        // --- Chips de Filtro (Requiere integración con ViewModel) ---
+        // --- FILTROS POR TIPO ---
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Actualmente, los chips solo manejan el estado visual.
-            // Para filtrar el mapa, necesitarías un ViewModel que gestione el filtro activo.
-            CustomFilterChip(label = "Restaurante", iconRes = R.drawable.cuchara)
-            CustomFilterChip(label = "Cafetería", iconRes = R.drawable.cafeteria)
-            CustomFilterChip(label = "Museo", iconRes = R.drawable.cuadro)
-            CustomFilterChip(label = "Comida rápida", iconRes = R.drawable.hamburguesa)
-            CustomFilterChip(label = "Hotel", iconRes = R.drawable.recurso)
+
+            FilterChipItem(
+                label = "Restaurante",
+                iconRes = R.drawable.cuchara,
+                type = PlaceType.RESTAURANTE,
+                selectedFilters = selectedFilters,
+                onChange = { selectedFilters = it }
+            )
+
+            FilterChipItem(
+                label = "Cafetería",
+                iconRes = R.drawable.cafeteria,
+                type = PlaceType.CAFE,
+                selectedFilters = selectedFilters,
+                onChange = { selectedFilters = it }
+            )
+
+            FilterChipItem(
+                label = "Museo",
+                iconRes = R.drawable.cuadro,
+                type = PlaceType.MUSEO,
+                selectedFilters = selectedFilters,
+                onChange = { selectedFilters = it }
+            )
+
+            FilterChipItem(
+                label = "Hotel",
+                iconRes = R.drawable.recurso,
+                type = PlaceType.HOTEL,
+                selectedFilters = selectedFilters,
+                onChange = { selectedFilters = it }
+            )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-    }
-}
+        Spacer(modifier = Modifier.height(10.dp))
 
-// -------------------------------------------------------------------------
-// --- COMPONENTES AUXILIARES ---
-// -------------------------------------------------------------------------
-
-@Composable
-fun CustomFilterChip(label: String, iconRes: Int) {
-    var isSelected by remember { mutableStateOf(false) }
-
-    Surface(
-        onClick = { isSelected = !isSelected },
-        shape = RoundedCornerShape(50),
-        color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
-        border = BorderStroke(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else Color.LightGray),
-        modifier = Modifier.shadow(
-            elevation = 1.dp,
-            shape = RoundedCornerShape(50),
-            ambientColor = Color.Black.copy(alpha = 0.05f),
-            spotColor = Color.Black.copy(alpha = 0.1f)
-        )
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+        // --- MAPA ---
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(horizontal = 16.dp)
+                .background(Color(0xFFE0E0E0), RoundedCornerShape(16.dp)),
+            contentAlignment = Alignment.Center
         ) {
-            Icon(
-                painter = painterResource(id = iconRes),
-                contentDescription = label,
-                tint = if (isSelected) Color.White else Color.Gray.copy(alpha = 0.7f),
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(Modifier.width(6.dp))
-            Text(
-                text = label,
-                color = if (isSelected) Color.White else Color.Gray.copy(alpha = 0.7f),
-                fontSize = 14.sp
+            Map(
+                places = filteredByType,
+                modifier = Modifier.fillMaxSize()
             )
         }
+
+        Text(
+            text = "Armenia / Quindío",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(24.dp)
+        )
     }
 }
