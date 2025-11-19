@@ -1,32 +1,36 @@
 package com.example.myapplication.ui.screen.admin.bottombar
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavHostController
+import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.myapplication.R
-import com.example.myapplication.ui.screen.admin.nav.AdminScreen
-
+import com.example.myapplication.ui.screen.admin.nav.RouteTab
 
 
 @Composable
 fun BottomBarAdmin(
-    navController: NavHostController
-){
+    navController: NavController
+) {
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    val primaryColor = MaterialTheme.colorScheme.primary
 
-    NavigationBar{
+    NavigationBar(
+    ) {
 
         Destination.entries.forEachIndexed { index, destination ->
 
@@ -35,31 +39,45 @@ fun BottomBarAdmin(
             NavigationBarItem(
                 label = {
                     Text(
-                        text = stringResource(destination.label)
+                        text = stringResource(id = destination.label),
                     )
                 },
                 onClick = {
-                    navController.navigate(destination.route)
+                    navController.navigate(destination.route) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                 },
                 icon = {
                     Icon(
                         imageVector = destination.icon,
-                        contentDescription = stringResource(destination.label)
+                        contentDescription = stringResource(id = destination.label)
                     )
                 },
-                selected = isSelected
+                selected = isSelected,
+
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = primaryColor,
+                    unselectedIconColor = primaryColor,
+                    selectedTextColor = primaryColor,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
             )
         }
-
-
     }
 }
 
+
 enum class Destination(
-    val route: AdminScreen,
+    val route: RouteTab,
     val label: Int,
     val icon: ImageVector
+
 ){
-    PLACES(AdminScreen.PlacesList, R.string.menu_home, Icons.Default.Home ),
-    HISTORY(AdminScreen.History, R.string.menu_search, Icons.Default.Search)
+    Home(RouteTab.Inicio, R.string.menu_home, Icons.Default.Home ),
+    Safe(RouteTab.SafeScreen, R.string.menu_auth, Icons.Default.Star ),
+    //CreatePlace(RouteTab.CreatePlaceScreen, R.string.menu_create_place, Icons.Default.Add )
 }

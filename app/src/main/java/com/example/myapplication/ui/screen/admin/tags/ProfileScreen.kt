@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.screen.admin.screens
+package com.example.myapplication.ui.screen.admin.tags
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -14,6 +14,8 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,21 +29,39 @@ import com.example.myapplication.R
 import com.example.myapplication.model.Role
 import com.example.myapplication.model.City
 import com.example.myapplication.model.User
+import com.example.myapplication.ui.screen.LocalMainViewModel
 
 @Composable
 fun ProfileScreen(
     onLogout: () -> Unit,
     onEditProfile: () -> Unit
 ) {
+
+    val usersViewModel = LocalMainViewModel.current.usersViewModel
+    val currentUser by usersViewModel.currentUser.collectAsState()
+
+    if (currentUser == null) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    val user = currentUser!!
+
     // Datos simulados
     val fakeUser = User(
-        id = "1",
-        name = "Admin",
-        username = "admin",
+        id = "2",
+        name = "Juan Pérez",
+        username = "juanp",
         role = Role.ADMIN,
         city = City.BOGOTA,
-        email = "admin@example.com",
-        password = "admin"
+        email = "juanp@example.com",
+        password = "pass123"
     )
 
     Column(
@@ -55,7 +75,7 @@ fun ProfileScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
         ProfileHeaderSection(
-            user = fakeUser,
+            user = user,
             onEditProfile = onEditProfile
         )
 
@@ -64,19 +84,19 @@ fun ProfileScreen(
 
         ProfileDataField(
             label = stringResource(R.string.profile_full_name),
-            value = fakeUser.name
+            value = user.name
         )
         ProfileDataField(
             label = stringResource(R.string.profile_username),
-            value = fakeUser.username
+            value = user.username
         )
         ProfileDataField(
             label = stringResource(R.string.profile_city),
-            value = fakeUser.city.toString()
+            value = user.city.toString()
         )
         ProfileDataField(
             label = stringResource(R.string.profile_email),
-            value = fakeUser.email
+            value = user.email
         )
 
         Spacer(modifier = Modifier.height(48.dp))
@@ -97,7 +117,7 @@ fun ProfileScreen(
 
 
 @Composable
-fun ProfileHeaderSection(user: User, onEditProfile: () -> Unit) {
+fun ProfileHeaderSection(user: User?, onEditProfile: () -> Unit) {
     val primaryColor = MaterialTheme.colorScheme.primary
 
     Row(
@@ -212,4 +232,3 @@ private fun ProfileDataField(label: String, value: String) {
         }
     }
 }
-

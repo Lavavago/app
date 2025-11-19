@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.screen.admin.screens
+package com.example.myapplication.ui.screen.admin2.screens
 
 import androidx.compose.runtime.Composable
 

@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.screen.admin.nav
+package com.example.myapplication.ui.screen.admin2.nav
 
 import kotlinx.serialization.Serializable
 

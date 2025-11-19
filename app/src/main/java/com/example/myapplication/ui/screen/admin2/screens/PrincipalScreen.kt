@@ -1,4 +1,4 @@
-package com.example.myapplication.ui.screen.admin.screens
+package com.example.myapplication.ui.screen.admin2.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -27,7 +27,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import com.example.myapplication.R
-import com.example.myapplication.ui.screen.admin.nav.AdminScreen
+import com.example.myapplication.ui.screen.admin2.nav.AdminScreen
 
 @Composable
 fun PrincipalScreen(navController: NavController) {

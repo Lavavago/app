@@ -30,9 +30,10 @@
 
     <string name="tittle_home">Inicio usuario</string>
 
-    <string name="menu_home">home</string>
+    <string name="menu_home">Home</string>
     <string name="menu_create_place">Contribuir</string>
     <string name="menu_safe">Guardados</string>
+    <string name="menu_auth">Autorizar</string>
     <string name="menu_Explorer">explorar</string>
 
     <string name="menu_profile">Perfil</string>
