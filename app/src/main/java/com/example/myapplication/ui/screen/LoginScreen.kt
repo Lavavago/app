@@ -45,6 +45,8 @@ import com.example.myapplication.viewmodel.UsersViewModel
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.mutableStateOf
 import android.widget.Toast
+import com.example.myapplication.ui.components.OperationResultHandler
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun LoginScreen(
@@ -52,6 +54,8 @@ fun LoginScreen(
     onNavigateToCreateUser: () -> Unit
 ) {
     val usersViewModel = LocalMainViewModel.current.usersViewModel
+    val userResult by usersViewModel.userResult.collectAsState()
+
 
     var username by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
@@ -109,7 +113,19 @@ fun LoginScreen(
         }
 
         TextButton(
-            onClick = { /* Lógica para olvidar contraseña */ },
+            onClick = {
+            if (username.isBlank()) {
+                Toast.makeText(context, "Ingresa tu correo para continuar", Toast.LENGTH_SHORT).show()
+            } else {
+                FirebaseAuth.getInstance()
+                    .sendPasswordResetEmail(username)
+                    .addOnSuccessListener {
+                        Toast.makeText(context, "Se envió un correo para restablecer la contraseña", Toast.LENGTH_LONG).show()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(context, "Error: ${it.message}", Toast.LENGTH_LONG).show()
+                    }
+            }},
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp)
@@ -133,17 +149,6 @@ fun LoginScreen(
             CustomButton(
                 onClick = {
                     val userLogged = usersViewModel.login(username,password)
-
-                    if (userLogged != null){
-                        onNavigateToHome(userLogged.id, userLogged.role)
-                        Toast.makeText(context, "Bienvenido", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(
-                            context,
-                            "Correo o contraseña incorrectos",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
                           },
                 text = stringResource(id = R.string.login_button),
             )
@@ -167,6 +172,18 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(text = "", color = MaterialTheme.colorScheme.error)
+
+        OperationResultHandler(
+            result = userResult,
+            onSuccess = {
+                onNavigateToHome(usersViewModel.currentUser.value!!.id, usersViewModel.currentUser.value!!.role)
+
+                usersViewModel.resetOperationResult()
+            },
+            onFailure = {
+                usersViewModel.resetOperationResult()
+            }
+        )
     }
 }
 

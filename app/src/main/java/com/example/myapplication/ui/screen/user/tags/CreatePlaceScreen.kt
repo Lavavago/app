@@ -40,6 +40,9 @@ fun CreatePlaceScreen(
 ) {
 
     // --- ESTADO DEL VIEWMODEL ---
+    val placeViewModel = LocalMainViewModel.current.placesViewModel
+    val placeResult by placeViewModel.placeResult.collectAsState()
+
     val title by createPlaceViewModel.title.collectAsState()
     val description by createPlaceViewModel.description.collectAsState()
     val address by createPlaceViewModel.address.collectAsState()

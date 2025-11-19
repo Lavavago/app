@@ -1,20 +1,76 @@
 package com.example.myapplication.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.myapplication.model.DayOfWeek // ¡IMPORTANTE!
 import com.example.myapplication.model.Location
 import com.example.myapplication.model.Place
 import com.example.myapplication.model.PlaceType
+import com.example.myapplication.model.User
+import com.example.myapplication.utils.RequestResult
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class PlacesViewModel: ViewModel() {
     private val _places = MutableStateFlow(emptyList<Place>())
     val places: StateFlow<List<Place>> = _places.asStateFlow()
 
+    private val _placeResult = MutableStateFlow<RequestResult?>(null)
+    val placeResult: StateFlow<RequestResult?> = _placeResult.asStateFlow()
+
+    private val _currentPlace = MutableStateFlow<Place?>(null)
+    val currentPlace: StateFlow<Place?> = _currentPlace.asStateFlow()
+    val db = Firebase.firestore
+
     init {
         loadPlaces()
+    }
+
+    fun addPlace(place: Place) {
+        _places.value = _places.value + place
+        /*viewModelScope.launch {
+            _placeResult.value = RequestResult.Loading
+            _placeResult.value = runCatching { addPlaceFirebase(place) }
+                .fold(
+                    onSuccess = { RequestResult.Success("Lugar creado correctamente")},
+                    onFailure = { RequestResult.Failure(it.message ?: "Error creando el Lugar")},
+                )
+        }*/
+    }
+
+    private suspend fun addPlaceFirebase(place: Place) {
+        val result = db.collection("places")
+            .add(place)
+            .await()
+    }
+
+    fun findById(id: String): Place? {
+        return _places.value.find { it.id == id }
+    }
+
+    fun findByType(type: PlaceType): List<Place> {
+        return _places.value.filter { it.type == type }
+    }
+
+    fun findByName(name: String): List<Place> {
+        return _places.value.filter { it.title.contains(name) }
+    }
+
+    fun removePlace(place: Place) {
+        _places.value = _places.value - place
+    }
+
+    fun updatePlace(place: Place) {
+        _places.value = _places.value.map { if (it.id == place.id) place else it }
+    }
+
+    fun resetOperationResult(){
+        _placeResult.value = null
     }
 
     fun loadPlaces() {
@@ -161,29 +217,4 @@ class PlacesViewModel: ViewModel() {
         )
     }
 
-
-
-    fun addPlace(place: Place) {
-        _places.value = _places.value + place
-    }
-
-    fun findById(id: String): Place? {
-        return _places.value.find { it.id == id }
-    }
-
-    fun findByType(type: PlaceType): List<Place> {
-        return _places.value.filter { it.type == type }
-    }
-
-    fun findByName(name: String): List<Place> {
-        return _places.value.filter { it.title.contains(name) }
-    }
-
-    fun removePlace(place: Place) {
-        _places.value = _places.value - place
-    }
-
-    fun updatePlace(place: Place) {
-        _places.value = _places.value.map { if (it.id == place.id) place else it }
-    }
 }

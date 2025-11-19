@@ -33,11 +33,11 @@ fun OperationResultHandler(
     LaunchedEffect(result){
         when(result){
             is RequestResult.Success -> {
-                delay(1500)
+                delay(800)
                 onSuccess()
             }
             is RequestResult.Failure -> {
-                delay(3000)
+                delay(2000)
                 onFailure()
             }
             else -> {}
