@@ -10,6 +10,4 @@ data class Review (
     val rating: Int,
     val comment: String,
     val date: LocalDateTime
-
-
 )

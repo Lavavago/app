@@ -1,5 +1,7 @@
 package com.example.myapplication.viewmodel
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import com.example.myapplication.model.Review
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -7,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.time.LocalDateTime
 
+@RequiresApi(Build.VERSION_CODES.O)
 class ReviewsViewModel: ViewModel() {
 
     private val _reviews = MutableStateFlow(emptyList<Review>())
@@ -24,6 +27,7 @@ class ReviewsViewModel: ViewModel() {
         _reviews.value = _reviews.value + review
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun loadReviews(){
 
         _reviews.value = listOf(
@@ -66,3 +70,4 @@ class ReviewsViewModel: ViewModel() {
         )
     }
 }
+

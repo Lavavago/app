@@ -136,7 +136,7 @@ fun RegisterUserScreen(
                 val user = User(
                     id = UUID.randomUUID().toString(),
                     name = name,
-                    username = email,
+                    username = username, // ✅ CORRECCIÓN APLICADA AQUÍ
                     city = city as City,
                     email = email,
                     role = Role.USER,
@@ -144,7 +144,7 @@ fun RegisterUserScreen(
                 )
                 usersViewModel.create(user)
                 onNavigateToLogin()
-                      },
+            },
             text = stringResource(R.string.save_user_button) // Usando "Guardar Usuario"
         )
 

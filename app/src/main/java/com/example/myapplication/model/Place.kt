@@ -12,5 +12,6 @@ data class Place (
     val phones: List<String>,
     val type: PlaceType,
     val schedules: Map<DayOfWeek, String>,
-    var visits: Int = 0
+    var visits: Int = 0,
+    val reviews: List<Review> = emptyList()
 )

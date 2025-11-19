@@ -23,22 +23,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+// 🛑 Eliminamos el import 'androidx.lifecycle.viewmodel.compose.viewModel' porque usamos LocalMainViewModel
 import com.example.myapplication.viewmodel.UsersViewModel
 import androidx.compose.ui.res.stringResource
 import com.example.myapplication.R
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.example.myapplication.model.City // Asegúrate de importar City
+import com.example.myapplication.model.City
+// Debes asegurarte que 'LocalMainViewModel' sea accesible
+// import com.example.myapplication.ui.screen.LocalMainViewModel // Si lo necesitas
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditUserScreen(
-    // Inyección de la instancia del ViewModel.
-    // Asegúrate de que todas tus pantallas (Login, Register, Edit) usen la misma instancia
-    // o un mecanismo de inyección compartido si usas NavHost.
-    createUserViewModel: UsersViewModel = viewModel(),
+    createUserViewModel: UsersViewModel = LocalMainViewModel.current.usersViewModel,
     onBack: () -> Unit
 ) {
     // 1. RECOLECCIÓN DE ESTADOS DEL VIEWMUDEL: Leemos los datos del usuario activo
@@ -46,7 +45,6 @@ fun EditUserScreen(
     val username by createUserViewModel.username.collectAsState()
     val email by createUserViewModel.email.collectAsState()
     val city by createUserViewModel.city.collectAsState()
-    // val saveResult by createUserViewModel.userSaveResult.collectAsState()
 
     var focusedField by remember { mutableStateOf<String?>(null) }
     val primaryColor = MaterialTheme.colorScheme.primary
@@ -91,7 +89,7 @@ fun EditUserScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // 2. USO DEL ESTADO 'name' Y FUNCIÓN 'onNameChange'
+            // 2. USO DEL ESTADO 'name'
             FloatingTextField(
                 value = name, // Muestra el nombre real del usuario
                 onValueChange = {
@@ -105,7 +103,7 @@ fun EditUserScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
 
-            // 3. USO DEL ESTADO 'username' Y FUNCIÓN 'onUsernameChange'
+            // 3. USO DEL ESTADO 'username'
             FloatingTextField(
                 value = username, // Muestra el username real
                 onValueChange = {
@@ -121,7 +119,7 @@ fun EditUserScreen(
 
             // 4. USO DEL ESTADO 'email' (No editable)
             FloatingTextField(
-                value = email, // Muestra el email real (No se puede editar en este ejemplo)
+                value = email, // Muestra el email real
                 onValueChange = { /* Ignorado, no es editable */ },
                 label = "${stringResource(R.string.profile_email)} ${stringResource(R.string.not_editable)}",
                 isFocused = focusedField == "email",
@@ -131,10 +129,9 @@ fun EditUserScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
 
-            // 5. USO DEL ESTADO 'city' (Muestra el nombre de la ciudad del usuario)
-            // Se usa .name y se reemplazan los guiones bajos por espacios para mejor visualización.
+            // 5. USO DEL ESTADO 'city'
             FloatingTextField(
-                value = city.name.replace("_", " "),
+                value = city.name.replace("_", " "), // Muestra el nombre de la ciudad actual
                 onValueChange = { /* Ignorado, se debería usar un Dropdown */ },
                 label = stringResource(R.string.profile_city),
                 isFocused = focusedField == "city",
@@ -152,10 +149,6 @@ fun EditUserScreen(
                 text = stringResource(R.string.save_changes)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            /*saveResult?.let { ... } // Lógica de mensaje de guardado (dejada comentada)
-*/
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
