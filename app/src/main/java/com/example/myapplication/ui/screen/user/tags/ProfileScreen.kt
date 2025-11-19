@@ -29,24 +29,40 @@ import com.example.myapplication.R
 import com.example.myapplication.model.Role
 import com.example.myapplication.model.City
 import com.example.myapplication.model.User
-// ⚠️ ASUME QUE ESTA CLASE Y PROPIEDAD EXISTEN EN TU PROYECTO
 import com.example.myapplication.ui.screen.LocalMainViewModel
-import com.example.myapplication.viewmodel.UsersViewModel
 
 @Composable
 fun ProfileScreen(
     onLogout: () -> Unit,
-    onEditProfile: () -> Unit,
-    // 1. Inyectar el ViewModel Compartido (Igual que en Register y Edit)
-    viewModel: UsersViewModel = LocalMainViewModel.current.usersViewModel
+    onEditProfile: () -> Unit
 ) {
-    // 2. Eliminar la variable 'fakeUser'
 
-    // 3. Recolectar los Estados del Usuario Activo
-    val name by viewModel.name.collectAsState()
-    val username by viewModel.username.collectAsState()
-    val city by viewModel.city.collectAsState()
-    val email by viewModel.email.collectAsState()
+    val usersViewModel = LocalMainViewModel.current.usersViewModel
+    val currentUser by usersViewModel.currentUser.collectAsState()
+
+    if (currentUser == null) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    val user = currentUser!!
+
+    // Datos simulados
+    val fakeUser = User(
+        id = "2",
+        name = "Juan Pérez",
+        username = "juanp",
+        role = Role.ADMIN,
+        city = City.BOGOTA,
+        email = "juanp@example.com",
+        password = "pass123"
+    )
 
     Column(
         modifier = Modifier
@@ -58,32 +74,29 @@ fun ProfileScreen(
     ) {
 
         Spacer(modifier = Modifier.height(32.dp))
-
-        // 4. Usar la versión corregida de ProfileHeaderSection (no requiere el objeto User)
         ProfileHeaderSection(
+            user = user,
             onEditProfile = onEditProfile
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
 
-        // 5. Usar los datos recolectados (name, username, etc.)
         ProfileDataField(
             label = stringResource(R.string.profile_full_name),
-            value = name // ⬅️ DATO ACTIVO
+            value = user.name
         )
         ProfileDataField(
             label = stringResource(R.string.profile_username),
-            value = username // ⬅️ DATO ACTIVO
+            value = user.username
         )
         ProfileDataField(
             label = stringResource(R.string.profile_city),
-            // Convertimos el Enum a un String legible
-            value = city.name.replace("_", " ") // ⬅️ DATO ACTIVO
+            value = user.city.toString()
         )
         ProfileDataField(
             label = stringResource(R.string.profile_email),
-            value = email // ⬅️ DATO ACTIVO
+            value = user.email
         )
 
         Spacer(modifier = Modifier.height(48.dp))
@@ -103,9 +116,8 @@ fun ProfileScreen(
 }
 
 
-// 6. CORRECCIÓN EN PROFILEHEADERSECTION: Ya no necesita el objeto User.
 @Composable
-fun ProfileHeaderSection(onEditProfile: () -> Unit) {
+fun ProfileHeaderSection(user: User?, onEditProfile: () -> Unit) {
     val primaryColor = MaterialTheme.colorScheme.primary
 
     Row(

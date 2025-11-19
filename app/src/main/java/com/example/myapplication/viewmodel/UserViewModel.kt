@@ -1,12 +1,20 @@
 package com.example.myapplication.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.myapplication.model.City
 import com.example.myapplication.model.Role
 import com.example.myapplication.model.User
+import com.example.myapplication.utils.RequestResult
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class UsersViewModel: ViewModel(){
 
@@ -36,7 +44,14 @@ class UsersViewModel: ViewModel(){
     private var editingUserId: String? = null
     private var editingUserRole: Role? = null
 
+    private val _userResult = MutableStateFlow<RequestResult?>(null)
+    val userResult: StateFlow<RequestResult?> = _userResult.asStateFlow()
 
+    private val _currentUser = MutableStateFlow<User?>(null)
+    val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
+
+    val db = Firebase.firestore
+    val auth :FirebaseAuth = FirebaseAuth.getInstance()
     init {
         loadUsers()
         // --- CORRECCIÓN 2: Se elimina la llamada a loadCurrentUser() ---
@@ -64,7 +79,7 @@ class UsersViewModel: ViewModel(){
      * Carga los datos del usuario actual (determinado por _currentUserId) en los StateFlows para la edición.
      */
     fun loadCurrentUser() {
-        val userToEdit = findById(_currentUserId.value)
+        /*val userToEdit = findById(_currentUserId.value)
 
         userToEdit?.let {
             // Guarda el ID y Rol del usuario que se está editando para futuras actualizaciones
@@ -85,7 +100,7 @@ class UsersViewModel: ViewModel(){
             _city.value = City.ARMENIA
             editingUserId = null
             editingUserRole = null
-        }
+        }*/
     }
 
     /**
@@ -123,72 +138,129 @@ class UsersViewModel: ViewModel(){
 
     // --- FUNCIONES DE MANEJO DE LISTA ORIGINALES ---
 
-    fun loadUsers(){
-
-        _users.value = listOf(
-            User(
-                id = "1", // Admin
-                name = "Admin",
-                username = "admin",
-                role = Role.ADMIN,
-                city = City.BOGOTA,
-                email = "admin@example.com",
-                password = "admin"
-            ),
-            User(
-                id = "2", // Juan Pérez
-                name = "Juan Pérez",
-                username = "juanp",
-                role = Role.USER,
-                city = City.ARMENIA,
-                email = "juanp@example.com",
-                password = "pass123"
-            ),
-            User(
-                id = "3",
-                name = "María Gómez",
-                username = "mariag",
-                role = Role.USER,
-                city = City.PEREIRA,
-                email = "mariag@example.com",
-                password = "pass456"
-            )
-        )
-
-    }
 
     /**
      * Crea un nuevo usuario y, crucialmente, lo establece como el usuario actual.
      */
+
     fun create(user: User){
-        // Generar un ID simple, ya que los IDs no son generados por una DB real aquí
-        val nextId = (_users.value.mapNotNull { it.id.toIntOrNull() }.maxOrNull() ?: 0) + 1
-        val newUserWithId = user.copy(id = nextId.toString())
+        viewModelScope.launch {
+            _userResult.value = RequestResult.Loading
+            _userResult.value = runCatching { createFirebase(user) }
+                .fold(
+                    onSuccess = { RequestResult.Success("Usuario creado correctamente")},
+                    onFailure = { RequestResult.Failure(it.message ?: "Error creando el Usuario")},
+                )
+        }
+    }
+    private suspend fun createFirebase(user: User){
+        val newUser = auth.createUserWithEmailAndPassword(user.email,user.password).await()
+        val uid = newUser.user?.uid ?: throw Exception("Error al obtener el id del usuario")
 
-        // 1. Añadir el nuevo usuario a la lista
-        _users.value = _users.value + newUserWithId
-
-        // 2. *** CAMBIO CLAVE: Establecer el nuevo usuario como el usuario actual. ***
-        setCurrentUser(newUserWithId.id)
-
-        // El setCurrentUser() llama a loadCurrentUser(), por lo que los campos de edición
-        // ahora reflejarán los datos de este nuevo usuario inmediatamente.
+        val userCopy = user.copy(
+            id = uid,
+            password = ""
+        )
+        db.collection("users")
+            .document(uid)
+            .set(userCopy)
+            .await()
     }
 
-    fun findById(id: String): User?{
-        return _users.value.find { it.id == id }
+
+    private suspend fun findByIdFirebase(id: String){
+        val snapshot = db.collection("users")
+            .document(id).get().await()
+
+        val user = snapshot.toObject(User::class.java)?.apply{
+            this.id = snapshot.id
+        }
+        _currentUser.value = user
     }
 
     fun findByEmail(email: String): User?{
         return _users.value.find { it.email == email }
     }
 
-    fun login(username: String, password: String): User?{
-        val loggedInUser = _users.value.find { it.username == username && it.password == password }
-        // Si el login es exitoso, establecemos la sesión
-        loggedInUser?.let {
-            setCurrentUser(it.id)
+    suspend fun loadUserById(id: String) {
+        val snapshot = db.collection("users").document(id).get().await()
+        val user = snapshot.toObject(User::class.java)?.apply { this.id = snapshot.id }
+        _currentUser.value = user
+    }
+    fun login(email: String, password: String){
+        viewModelScope.launch {
+            _userResult.value = RequestResult.Loading
+            _userResult.value = runCatching { loginFirebase(email, password) }
+                .fold(
+                    onSuccess = { RequestResult.Success("Login exitoso")},
+                    onFailure = { RequestResult.Failure( "Error en el login")},
+                )
         }
-        return loggedInUser
+    }
+
+    private suspend fun loginFirebase(email: String, password: String){
+        val responseUser = auth.signInWithEmailAndPassword(email,password).await()
+        val uid = responseUser.user?.uid ?: throw Exception("Usuario no encontrado")
+        findByIdFirebase(uid)
+    }
+
+    fun logout(){
+        auth.signOut()
+        _currentUser.value = null
+
+    }
+
+    fun resetPassword(email: String) {
+        viewModelScope.launch {
+            _userResult.value = RequestResult.Loading
+
+            _userResult.value = runCatching {
+                resetPasswordFirebase(email)
+            }.fold(
+                onSuccess = { RequestResult.Success("Se ha enviado un correo para restablecer la contraseña") },
+                onFailure = { RequestResult.Failure(it.message ?: "Error al enviar el correo") }
+            )
+        }
+    }
+
+    private suspend fun resetPasswordFirebase(email: String) {
+        auth.sendPasswordResetEmail(email).await()
+    }
+
+    fun resetOperationResult(){
+        _userResult.value = null
+    }
+    fun loadUsers(){
+
+        /*    _users.value = listOf(
+                User(
+                    id = "1", // Admin
+                    name = "Admin",
+                    username = "admin",
+                    role = Role.ADMIN,
+                    city = City.BOGOTA,
+                    email = "admin@example.com",
+                    password = "admin"
+                ),
+                User(
+                    id = "2", // Juan Pérez
+                    name = "Juan Pérez",
+                    username = "juanp",
+                    role = Role.USER,
+                    city = City.ARMENIA,
+                    email = "juanp@example.com",
+                    password = "pass123"
+                ),
+                User(
+                    id = "3",
+                    name = "María Gómez",
+                    username = "mariag",
+                    role = Role.USER,
+                    city = City.PEREIRA,
+                    email = "mariag@example.com",
+                    password = "pass456"
+                )
+            )
+        */
     }
 }

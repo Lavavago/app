@@ -27,9 +27,10 @@ import com.example.myapplication.model.City
 import com.example.myapplication.model.DisplayableEnum
 import com.example.myapplication.model.Role
 import com.example.myapplication.model.User
-import java.util.UUID
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Place
+import androidx.compose.runtime.collectAsState
+import com.example.myapplication.ui.components.OperationResultHandler
 
 
 @Composable
@@ -38,6 +39,7 @@ fun RegisterUserScreen(
 ) {
 
     val usersViewModel = LocalMainViewModel.current.usersViewModel
+    val userResult by usersViewModel.userResult.collectAsState()
 
     var city by remember { mutableStateOf<DisplayableEnum>(City.ARMENIA) }
     val cities = City.entries
@@ -134,7 +136,6 @@ fun RegisterUserScreen(
         CustomButton(
             onClick = {
                 val user = User(
-                    id = UUID.randomUUID().toString(),
                     name = name,
                     username = username, // ✅ CORRECCIÓN APLICADA AQUÍ
                     city = city as City,
@@ -143,8 +144,7 @@ fun RegisterUserScreen(
                     password = password
                 )
                 usersViewModel.create(user)
-                onNavigateToLogin()
-            },
+                      },
             text = stringResource(R.string.save_user_button) // Usando "Guardar Usuario"
         )
 
@@ -172,5 +172,15 @@ fun RegisterUserScreen(
         TextButton(onClick = onNavigateToLogin) {
             Text(text = stringResource(R.string.profile_return_login))
         }
+        OperationResultHandler(
+            result = userResult,
+            onSuccess = {
+                onNavigateToLogin()
+                usersViewModel.resetOperationResult()
+            },
+            onFailure = {
+                usersViewModel.resetOperationResult()
+            }
+        )
     }
 }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -50,6 +51,14 @@ fun Navigation(
         CompositionLocalProvider(
             LocalMainViewModel provides mainViewModel
         ) {
+            LaunchedEffect(Unit) {
+                if (user.isNotEmpty()) {
+                    val userId = user["userId"]
+                    if (userId != null) {
+                        mainViewModel.usersViewModel.loadUserById(userId)
+                    }
+                }
+            }
 
             NavHost(
                 navController = navController,
