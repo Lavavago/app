@@ -186,4 +186,13 @@ class PlacesViewModel: ViewModel() {
     fun updatePlace(place: Place) {
         _places.value = _places.value.map { if (it.id == place.id) place else it }
     }
+
+    fun increaseVisits(id: String) {
+        val place = findById(id)
+        if (place != null) {
+            val updated = place.copy(visits = place.visits + 1)
+            updatePlace(updated)
+        }
+    }
+
 }

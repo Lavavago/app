@@ -13,9 +13,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,12 +27,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.myapplication.model.DayOfWeek
 import com.example.myapplication.model.Place
+import com.example.myapplication.ui.components.sharePlaceGoogle
 import com.example.myapplication.viewmodel.PlacesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,6 +46,10 @@ fun PlaceDetail(
 ) {
     val place = placesViewModel.findById(id) ?: return
 
+    LaunchedEffect(id) {
+        placesViewModel.increaseVisits(id)
+    }
+
     Column(
         modifier = Modifier
             .padding(padding)
@@ -50,18 +58,40 @@ fun PlaceDetail(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        // --- Header (Ejemplo de implementación básica) ---
-        Text(
-            text = place.title,
-            fontSize = 28.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = Color(0xFF4A148C) // Púrpura oscuro
-        )
+        // --- Header con botón de compartir ---
+        val context = LocalContext.current
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = place.title,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color(0xFF4A148C)
+            )
+
+            IconButton(onClick = {
+                sharePlaceGoogle(context, place)   // o sharePlaceMapbox(context, place)
+            }) {
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    contentDescription = "Compartir",
+                    tint = Color(0xFF7C3AED)
+                )
+            }
+        }
         Spacer(Modifier.height(4.dp))
+
+
+// ⬇⬇⬇ CONTADOR VISITAS ⬇⬇⬇
         Text(
-            text = "Tipo: ${place.type.name.replace('_', ' ')}",
-            fontSize = 16.sp,
-            color = Color.Gray
+            text = "Visitado ${place.visits} veces",
+            fontSize = 14.sp,
+            color = Color(0xFF7C3AED), // Púrpura bonito
+            fontWeight = FontWeight.SemiBold
         )
 
         Spacer(Modifier.height(16.dp))
